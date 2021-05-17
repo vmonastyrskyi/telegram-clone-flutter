@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:telegram_clone_mobile/ui/screens/auth/auth.dart';
+import 'package:telegram_clone_mobile/ui/screens/auth/choose_country/choose_country_screen.dart';
+import 'package:telegram_clone_mobile/ui/screens/auth/input_phone/input_phone_screen.dart';
 import 'package:telegram_clone_mobile/util/slide_left_with_fade_route.dart';
 
-abstract class AppRoutes {
-  static const String Home = '/';
-  static const String Auth = 'auth';
+abstract class AuthRoutes {
+  static const String InputPhone = 'InputPhone';
+  static const String ChooseCountry = 'ChooseCountry';
 }
 
-class RootRouter {
+class AuthRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.Auth:
+      case AuthRoutes.InputPhone:
         return SlideLeftWithFadeRoute(
-          builder: (context) => AuthScreen(),
+          builder: (context) => InputPhoneScreen(),
+        );
+      case AuthRoutes.ChooseCountry:
+        return SlideLeftWithFadeRoute(
+          builder: (context) => ChooseCountryScreen(),
         );
       default:
         return MaterialPageRoute(builder: (_) {
