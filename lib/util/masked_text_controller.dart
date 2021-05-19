@@ -15,27 +15,24 @@ class MaskedTextController extends TextEditingController {
   }) : super(text: text) {
     this.filter = filter ?? defaultFilter;
 
-    this.addListener(() {
-      this.updateText(this.text);
+    addListener(() {
+      formatText(this.text);
     });
 
-    this.updateText(this.text);
+    formatText(this.text);
   }
 
   String mask;
   Map<String, RegExp>? filter;
 
-  void updateText(String text) {
-    this.text = this._applyMask(this.mask, text);
+  void formatText(String text) {
+    this.text = _applyMask(this.mask, text);
   }
 
-  void changeMask(String mask, {bool moveCursorToEnd = true}) {
+  void changeMask(String mask) {
     this.mask = mask;
-    this.updateText(this.text);
-
-    if (moveCursorToEnd) {
-      this.moveCursorToEnd();
-    }
+    formatText(text);
+    moveCursorToEnd();
   }
 
   void moveCursorToEnd() {
@@ -49,6 +46,10 @@ class MaskedTextController extends TextEditingController {
       selection: TextSelection.collapsed(offset: newText.trim().length),
       composing: TextRange.empty,
     );
+  }
+
+  bool isValid() {
+    return text.length == mask.length;
   }
 
   String _applyMask(String mask, String value) {
