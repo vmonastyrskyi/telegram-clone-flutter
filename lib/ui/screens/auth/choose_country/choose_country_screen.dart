@@ -10,8 +10,6 @@ import 'widgets/searched_country_list_item.dart';
 class ChooseCountryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: CustomAppBar(),
       body: Consumer<ChooseCountryProvider>(
@@ -41,7 +39,7 @@ class ChooseCountryScreen extends StatelessWidget {
                       child: Text(
                         'No results',
                         style: TextStyle(
-                          color: theme.textTheme.headline2!.color,
+                          color: Theme.of(context).textTheme.headline2!.color,
                           fontSize: 20,
                         ),
                       ),
@@ -62,8 +60,10 @@ class ChooseCountryScreen extends StatelessWidget {
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(72, 8, 24, 8),
-                            child:
-                                Divider(height: 1, color: theme.dividerColor),
+                            child: Divider(
+                              height: 1,
+                              color: Theme.of(context).dividerColor,
+                            ),
                           ),
                         ),
                     ],

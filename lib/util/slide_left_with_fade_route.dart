@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 
-class SlideLeftWithFadeRoute<T> extends MaterialPageRoute<T> {
-  SlideLeftWithFadeRoute({
+enum SlideDirection { leftToRight, rightToLeft }
+
+class SlideWithFadeRoute<T> extends MaterialPageRoute<T> {
+  SlideWithFadeRoute({
     required WidgetBuilder builder,
+    this.slideDirection = SlideDirection.leftToRight,
     RouteSettings? settings,
   }) : super(builder: builder, settings: settings);
+
+  final SlideDirection slideDirection;
 
   @override
   Duration get transitionDuration => Duration(milliseconds: 225);
@@ -15,7 +20,9 @@ class SlideLeftWithFadeRoute<T> extends MaterialPageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation, Widget child) {
-    var slideBegin = Offset(1.0, 0.0);
+    var slideBegin = slideDirection == SlideDirection.leftToRight
+        ? Offset(1.0, 0.0)
+        : Offset(-1.0, 0.0);
     var slideEnd = Offset.zero;
     var fadeBegin = 0.0;
     var fadeEnd = 1.0;

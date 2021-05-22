@@ -11,20 +11,28 @@ class RootRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.Auth:
-        return SlideLeftWithFadeRoute(
+        return SlideWithFadeRoute(
           builder: (context) => AuthScreen(),
         );
       default:
-        return MaterialPageRoute(builder: (_) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('Telegram'),
-            ),
-            body: Center(
-              child: Text('No route defined for ${settings.name}'),
-            ),
-          );
-        });
+        return MaterialPageRoute(
+          builder: (context) {
+            return Scaffold(
+              appBar: AppBar(
+                title: Text('Telegram'),
+              ),
+              body: Center(
+                child: Text(
+                  'No route defined for ${settings.name}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Theme.of(context).textTheme.headline2!.color,
+                  ),
+                ),
+              ),
+            );
+          },
+        );
     }
   }
 }
