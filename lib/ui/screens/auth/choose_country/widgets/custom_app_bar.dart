@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:telegram_clone_mobile/business_logic/view_models/choose_country.dart';
-import 'package:telegram_clone_mobile/ui/widgets/appbar_icon_button.dart';
+import 'package:telegram_clone_mobile/ui/shared_widgets/appbar_icon_button.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   const CustomAppBar({Key? key}) : super(key: key);
@@ -34,28 +34,31 @@ class _CustomAppBarState extends State<CustomAppBar>
 
   @override
   void dispose() {
+    _countrySearchController.dispose();
     _clearButtonController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final enableCountrySearch = context.select(
         (ChooseCountryProvider chooseCountry) =>
             chooseCountry.enableCountrySearch);
 
     return AppBar(
+      elevation: 1.5,
+      titleSpacing: 0,
+      automaticallyImplyLeading: false,
       title: Padding(
         padding: const EdgeInsets.only(left: 16),
         child: AnimatedSwitcher(
           duration: Duration(milliseconds: 175),
           reverseDuration: Duration(milliseconds: 175),
-          switchInCurve: Curves.easeInOutSine,
-          switchOutCurve: Curves.easeInOutSine,
+          switchInCurve: Curves.easeInOutCubic,
+          switchOutCurve: Curves.easeInOutCubic,
           transitionBuilder: (child, animation) {
             final scale =
-                Tween<double>(begin: 0.975, end: 1.0).animate(animation);
+                Tween<double>(begin: 0.985, end: 1.0).animate(animation);
             final opacity =
                 Tween<double>(begin: 0.0, end: 1.0).animate(animation);
             return ScaleTransition(
@@ -72,9 +75,6 @@ class _CustomAppBarState extends State<CustomAppBar>
               : _buildTitle(context),
         ),
       ),
-      elevation: 1.5,
-      titleSpacing: 0,
-      automaticallyImplyLeading: false,
       leading: AppBarIconButton(
         icon: Icons.arrow_back,
         onTap: () {
@@ -89,7 +89,7 @@ class _CustomAppBarState extends State<CustomAppBar>
             onTap: () => _toggleCountrySearch(true),
             icon: Icons.search,
             iconSize: 24,
-            iconColor: theme.textTheme.headline1!.color!,
+            iconColor: Theme.of(context).textTheme.headline1!.color!,
           ),
         if (_showClearButton)
           _ClearButton(
@@ -115,8 +115,6 @@ class _CustomAppBarState extends State<CustomAppBar>
   }
 
   Widget _buildCountrySearch(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Row(
       key: _countrySearchKey,
       children: <Widget>[
@@ -141,18 +139,18 @@ class _CustomAppBarState extends State<CustomAppBar>
             autofocus: true,
             autocorrect: true,
             controller: _countrySearchController,
-            cursorColor: theme.textTheme.headline1!.color,
+            cursorColor: Theme.of(context).textTheme.headline1!.color,
             textCapitalization: TextCapitalization.sentences,
             keyboardType: TextInputType.text,
             style: TextStyle(
-              color: theme.textTheme.headline1!.color,
+              color: Theme.of(context).textTheme.headline1!.color,
               fontSize: 18,
             ),
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: 'Search',
               hintStyle: TextStyle(
-                color: theme.textTheme.headline2!.color,
+                color: Theme.of(context).textTheme.headline2!.color,
                 fontSize: 18,
               ),
             ),
@@ -217,13 +215,12 @@ class _ClearButton extends AnimatedWidget {
   }
 
   Widget buildClearButton(BuildContext context) {
-    final theme = Theme.of(context);
 
     return AppBarIconButton(
       onTap: onPressed,
       icon: Icons.close,
       iconSize: 24,
-      iconColor: theme.textTheme.headline1!.color!,
+      iconColor: Theme.of(context).textTheme.headline1!.color!,
       splash: false,
     );
   }

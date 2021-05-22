@@ -22,8 +22,6 @@ class CountryGroupListItem extends StatelessWidget {
   }
 
   Widget _buildLeading(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -34,7 +32,7 @@ class CountryGroupListItem extends StatelessWidget {
           child: Text(
             countryGroup.group,
             style: TextStyle(
-              color: theme.textTheme.headline3!.color,
+              color: Theme.of(context).textTheme.headline3!.color,
               fontSize: 22,
               fontWeight: FontWeight.w500,
             ),
@@ -45,8 +43,6 @@ class CountryGroupListItem extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
-    final theme = Theme.of(context);
-
     return SliverList(
       delegate: SliverChildListDelegate(
         <Widget>[
@@ -59,14 +55,14 @@ class CountryGroupListItem extends StatelessWidget {
                   Navigator.of(context).pop();
                 },
                 child: Padding(
-                  padding: EdgeInsets.only(left: 72, right: 36),
+                  padding: const EdgeInsets.only(left: 72, right: 36),
                   child: Row(
                     children: <Widget>[
                       Expanded(
                         child: Text(
                           country.name,
                           style: TextStyle(
-                            color: theme.textTheme.headline1!.color,
+                            color: Theme.of(context).textTheme.headline1!.color,
                             fontSize: 17,
                             fontWeight: FontWeight.normal,
                           ),
@@ -75,7 +71,7 @@ class CountryGroupListItem extends StatelessWidget {
                       Text(
                         '+${country.code}',
                         style: TextStyle(
-                          color: theme.accentColor,
+                          color: Theme.of(context).accentColor,
                           fontSize: 17,
                           fontWeight: FontWeight.normal,
                         ),

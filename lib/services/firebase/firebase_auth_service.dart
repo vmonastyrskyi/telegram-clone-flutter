@@ -8,21 +8,29 @@ class FirebaseAuthService {
   }
 
   Future<void> signInWithPhoneNumber(
-    String phoneNumber,
-    Function(PhoneAuthCredential) verificationCompleted,
-    Function(FirebaseAuthException) verificationFailed,
-    Function(String, int?) codeSent,
-    Function(String) codeAutoRetrievalTimeout,
-  ) async {
+    String phoneNumber, {
+    required void Function(PhoneAuthCredential) verificationCompleted,
+    required void Function(FirebaseAuthException) verificationFailed,
+    required void Function(String, int?) codeSent,
+    void Function(String)? codeAutoRetrievalTimeout,
+    String? autoRetrievedSmsCodeForTesting,
+    int? forceResendingToken,
+  }) async {
     return await _auth.verifyPhoneNumber(
       phoneNumber: phoneNumber,
-      verificationCompleted:
-          verificationCompleted,
+      verificationCompleted: verificationCompleted,
       verificationFailed: verificationFailed,
       codeSent: codeSent,
-      codeAutoRetrievalTimeout:
-          codeAutoRetrievalTimeout,
+      codeAutoRetrievalTimeout: codeAutoRetrievalTimeout ?? (verificationId) {},
+      autoRetrievedSmsCodeForTesting: autoRetrievedSmsCodeForTesting,
+      timeout: Duration(seconds: 30),
+      forceResendingToken: forceResendingToken,
     );
+  }
+
+  Future<UserCredential> signInWithCredentials(
+      PhoneAuthCredential credential) async {
+    return await _auth.signInWithCredential(credential);
   }
 
   Stream<User?> get onAuthStateChanged {

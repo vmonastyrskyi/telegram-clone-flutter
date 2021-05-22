@@ -15,8 +15,6 @@ class SearchedCountryListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Stack(
       children: <Widget>[
         Container(
@@ -27,14 +25,14 @@ class SearchedCountryListItem extends StatelessWidget {
               Navigator.of(context).pop();
             },
             child: Padding(
-              padding: EdgeInsets.only(left: 20, right: 18),
+              padding: const EdgeInsets.only(left: 20, right: 18),
               child: Row(
                 children: <Widget>[
                   Expanded(
                     child: Text(
                       country.name,
                       style: TextStyle(
-                        color: theme.textTheme.headline1!.color,
+                        color: Theme.of(context).textTheme.headline1!.color,
                         fontSize: 17,
                         fontWeight: FontWeight.normal,
                       ),
@@ -43,7 +41,7 @@ class SearchedCountryListItem extends StatelessWidget {
                   Text(
                     '+${country.code}',
                     style: TextStyle(
-                      color: theme.accentColor,
+                      color: Theme.of(context).accentColor,
                       fontSize: 17,
                       fontWeight: FontWeight.normal,
                     ),
@@ -58,7 +56,10 @@ class SearchedCountryListItem extends StatelessWidget {
             left: 20,
             right: 0,
             bottom: 0,
-            child: Divider(height: 1, color: theme.dividerColor),
+            child: Divider(
+              height: 1,
+              color: Theme.of(context).dividerColor,
+            ),
           )
       ],
     );

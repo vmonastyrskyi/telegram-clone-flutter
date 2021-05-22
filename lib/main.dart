@@ -22,7 +22,7 @@ class _TelegramCloneAppState extends State<TelegramCloneApp> {
   bool _initialized = false;
   bool _error = false;
 
-  void _initializeFirebase() async {
+  void _initFirebase() async {
     try {
       await Firebase.initializeApp();
 
@@ -30,7 +30,6 @@ class _TelegramCloneAppState extends State<TelegramCloneApp> {
 
       setState(() {
         _initialized = true;
-        firebaseAuthService = FirebaseAuthService();
         if (firebaseAuthService.isAuthenticated())
           _initialRoute = AppRoutes.Home;
       });
@@ -42,7 +41,7 @@ class _TelegramCloneAppState extends State<TelegramCloneApp> {
   @override
   void initState() {
     super.initState();
-    _initializeFirebase();
+    _initFirebase();
   }
 
   @override
@@ -70,13 +69,21 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeManager.darkTheme,
       home: Scaffold(
         body: Container(
           child: Center(
-            child: Text('Telegram'),
+            child: Text(
+              'Telegram',
+              style: TextStyle(
+                fontSize: 18,
+                color: Theme.of(context).textTheme.headline1!.color,
+              ),
+            ),
           ),
         ),
       ),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

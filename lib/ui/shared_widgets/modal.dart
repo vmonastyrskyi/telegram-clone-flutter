@@ -22,53 +22,27 @@ class Modal extends StatefulWidget {
   _ModalState createState() => _ModalState();
 }
 
-class _ModalState extends State<Modal> with SingleTickerProviderStateMixin {
+class _ModalState extends State<Modal> {
   static final double _kElevation = 3.0;
   static final double _kTitleFontSize = 20.0;
 
-  late AnimationController _controller;
-  late Animation<double> _scale;
-  late Animation<double> _opacity;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 250));
-    _scale = Tween<double>(begin: 0.85, end: 1.0).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic));
-    _opacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic));
-
-    _controller.forward();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Center(
-        child: ScaleTransition(
-          scale: _scale,
-          child: FadeTransition(
-            opacity: _opacity,
-            child: Material(
-              elevation: _kElevation,
-              color: theme.primaryColor,
-              borderRadius: const BorderRadius.all(Radius.circular(6.0)),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  _buildTitle(),
-                  _buildContent(),
-                  _buildActions(),
-                ],
-              ),
-            ),
+        child: Material(
+          elevation: _kElevation,
+          color: Theme.of(context).primaryColor,
+          borderRadius: const BorderRadius.all(Radius.circular(6.0)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              _buildTitle(),
+              _buildContent(),
+              _buildActions(),
+            ],
           ),
         ),
       ),
