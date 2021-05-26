@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:telegram_clone_mobile/ui/screens/auth/auth.dart';
+import 'package:telegram_clone_mobile/ui/screens/auth/auth_screen.dart';
+import 'package:telegram_clone_mobile/ui/screens/home/home_screen.dart';
 import 'package:telegram_clone_mobile/util/slide_left_with_fade_route.dart';
 
 abstract class AppRoutes {
@@ -13,6 +14,10 @@ class RootRouter {
       case AppRoutes.Auth:
         return SlideWithFadeRoute(
           builder: (context) => AuthScreen(),
+        );
+      case AppRoutes.Home:
+        return SlideWithFadeRoute(
+          builder: (context) => HomeScreen(),
         );
       default:
         return MaterialPageRoute(

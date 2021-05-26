@@ -1,9 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/services/firebase/firebase_auth_service.dart';
-import 'package:telegram_clone_mobile/ui/router.dart';
-import 'package:telegram_clone_mobile/ui/themes/theme_manager.dart';
+import 'package:telegram_clone_mobile/business_logic/view_models/theme_provider.dart';
+import 'package:telegram_clone_mobile/ui/themes/theme_provider.dart';
+
+import 'services/firebase/firebase_auth_service.dart';
+import 'ui/router.dart';
+import 'ui/themes/themes.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +21,7 @@ class TelegramCloneApp extends StatefulWidget {
 class _TelegramCloneAppState extends State<TelegramCloneApp> {
   late FirebaseAuthService firebaseAuthService;
 
-  String _initialRoute = AppRoutes.Auth;
+  String _initialRoute = AppRoutes.Home;
   bool _initialized = false;
   bool _error = false;
 
@@ -51,25 +54,28 @@ class _TelegramCloneAppState extends State<TelegramCloneApp> {
     }
 
     if (!_initialized) {
-      return SplashScreen();
+      return _SplashScreen();
     }
 
-    return Provider<FirebaseAuthService>.value(
-      value: firebaseAuthService,
-      child: MainScreen(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        Provider<FirebaseAuthService>.value(value: firebaseAuthService),
+      ],
+      child: _MainScreen(
         initialRoute: _initialRoute,
       ),
     );
   }
 }
 
-class SplashScreen extends StatelessWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeManager.darkTheme,
+      theme: Themes.darkTheme,
       home: Scaffold(
         body: Container(
           child: Center(
@@ -88,8 +94,8 @@ class SplashScreen extends StatelessWidget {
   }
 }
 
-class MainScreen extends StatelessWidget {
-  const MainScreen({
+class _MainScreen extends StatelessWidget {
+  const _MainScreen({
     Key? key,
     required this.initialRoute,
   }) : super(key: key);
@@ -98,12 +104,28 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Telegram',
-      theme: ThemeManager.darkTheme,
-      initialRoute: initialRoute,
-      onGenerateRoute: RootRouter.generateRoute,
-      debugShowCheckedModeBanner: false,
+    // return ThemeManager(
+    //   duration: Duration(milliseconds: 500),
+    //   builder: (context, theme) {
+    //     return MaterialApp(
+    //       title: 'Telegram',
+    //       theme: theme,
+    //       initialRoute: initialRoute,
+    //       onGenerateRoute: RootRouter.generateRoute,
+    //       debugShowCheckedModeBanner: false,
+    //     );
+    //   },
+    // );
+    return ThemeManager(
+      builder: (context, theme) {
+        return MaterialApp(
+          title: 'Telegram',
+          theme: theme,
+          initialRoute: initialRoute,
+          onGenerateRoute: RootRouter.generateRoute,
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }
