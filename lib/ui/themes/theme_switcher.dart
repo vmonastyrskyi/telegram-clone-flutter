@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'theme_provider.dart';
+import 'theme_manager.dart';
 
 class ThemeSwitcher extends StatefulWidget {
   final Widget Function(BuildContext) builder;

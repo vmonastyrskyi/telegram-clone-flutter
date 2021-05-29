@@ -1,257 +1,109 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rive/rive.dart';
+import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:telegram_clone_mobile/constants/shared_preferences.dart';
+import 'package:telegram_clone_mobile/models/country.dart';
+import 'package:telegram_clone_mobile/models/user_details.dart';
+import 'package:telegram_clone_mobile/locator.dart';
+import 'package:telegram_clone_mobile/services/firebase/auth_service.dart';
 import 'package:telegram_clone_mobile/ui/icons/app_icons.dart';
+import 'package:telegram_clone_mobile/ui/router.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/rounded_avatar.dart';
-import 'package:telegram_clone_mobile/ui/themes/theme_provider.dart';
+import 'package:telegram_clone_mobile/ui/themes/theme_manager.dart';
 import 'package:telegram_clone_mobile/ui/themes/theme_switcher.dart';
+import 'package:telegram_clone_mobile/util/phone_number_mask.dart';
 
 class NavDrawer extends StatefulWidget {
+  NavDrawer({
+    Key? key,
+    this.userDetails,
+  }) : super(key: key);
+
+  final UserDetails? userDetails;
+
   @override
   NavDrawerState createState() => NavDrawerState();
 }
 
-class ThemeSwitch extends StatefulWidget {
-  const ThemeSwitch({Key? key}) : super(key: key);
+class NavDrawerState extends State<NavDrawer>
+    with SingleTickerProviderStateMixin {
+  static const int _kThemeSwitchingDuration = 700;
 
-  @override
-  ThemeSwitchState createState() => ThemeSwitchState();
-}
+  final AuthService _authService = services.get<AuthService>();
 
-class ThemeSwitchState extends State<ThemeSwitch> {
-  Artboard? _riveArtboard;
+  late final AnimationController _themeSwitcherController;
+
+  String? _phoneNumberFormat;
 
   @override
   void initState() {
     super.initState();
-    rootBundle.load('assets/rive/theme_switcher.riv').then(
-      (data) async {
-        final file = RiveFile.import(data);
-        final artboard = file.mainArtboard;
-        final brightness = ThemeManager.of(context).currentTheme.brightness;
-        if (brightness == Brightness.dark)
-          artboard.addController(SimpleAnimation('idle_sun'));
-        else if (brightness == Brightness.light)
-          artboard.addController(SimpleAnimation('idle_moon'));
-        setState(() => _riveArtboard = artboard);
-      },
+    _themeSwitcherController = AnimationController(
+      duration: Duration(milliseconds: _kThemeSwitchingDuration),
+      vsync: this,
     );
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _loadPhoneNumberFormat();
+    });
+  }
+
+  void _loadPhoneNumberFormat() async {
+    final prefs = await SharedPreferences.getInstance();
+    final selectedCountryJson =
+        prefs.getString(SharedPrefsConstants.kSelectedCountry);
+    if (selectedCountryJson != null) {
+      final selectedCountry = Country.fromJson(jsonDecode(selectedCountryJson));
+      setState(() {
+        _phoneNumberFormat = selectedCountry.format;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _themeSwitcherController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // final brightness = ThemeManager.of(context).themeData.brightness;
-    // if (brightness == Brightness.dark) {
-    //   if (_show)
-    //     return RenderObjectWrapper<String>(
-    //       id: _id,
-    //       manager: ThemeManager.of(context).renderManager,
-    //       onUnmount: (_) {
-    //         if (!_show) {
-    //           ThemeManager.of(context).changeTheme(reverse: true);
-    //         }
-    //       },
-    //       child: GestureDetector(
-    //         onTap: () {
-    //           ThemeManager.of(context).getSwitcherCoordinates(_id);
-    //           ThemeManager.of(context)
-    //               .setSwitcherKey(widget.key as GlobalKey<ThemeSwitchState>);
-    //           show = false;
-    //         },
-    //         child: Icon(
-    //           AppIcons.light_theme,
-    //           color: Colors.white,
-    //         ),
-    //       ),
-    //     );
-    //   else
-    //     return const SizedBox.shrink();
-    // } else {
-    //   if (_riveArtboard != null) {
-
-    //     return GestureDetector(
-    //       onTap: () {
-    //         final brightness = ThemeManager.of(context).themeData.brightness;
-    //
-    //         if (brightness == Brightness.dark) {
-    //           _riveArtboard!.addController(
-    //               _riveController = SimpleAnimation('sun'));
-    //           // setState(() => _riveController.isActive = true);
-    //         } else if (brightness == Brightness.light) {
-    //           _riveArtboard!.addController(
-    //               _riveController = SimpleAnimation('moon'));
-    //           // setState(() => _riveController.isActive = true);
-    //         }
-    //
-    //         // ThemeManager.of(context).getSwitcherCoordinates(_id);
-    //         ThemeManager.of(context)
-    //             .setSwitcherKey(widget.key as GlobalKey<ThemeSwitchState>);
-    //         ThemeManager.of(context).changeTheme();
-    //       },
-    //       child: _riveArtboard != null ? Rive(artboard: _riveArtboard!) : const SizedBox.shrink(),
-    //     );
-
-    // } else {
-    //   return const SizedBox.shrink();
-    // }
-    // }
-    // if (_show)
-    //   return RenderObjectWrapper<String>(
-    //     id: _id,
-    //     manager: ThemeManager.of(context).renderManager,
-    //     onUnmount: (_) {
-    //       if (!_show) {
-    //         ThemeManager.of(context).changeTheme(reverse: true);
-    //       }
-    //     },
-    //     child: GestureDetector(
-    //       onTap: () {
-    //         ThemeManager.of(context).getSwitcherCoordinates(_id);
-    //         ThemeManager.of(context).setSwitcherKey(widget.key as GlobalKey<ThemeSwitchState>);
-    //         show = false;
-    //       },
-    //       child: Icon(
-    //         AppIcons.light_theme,
-    //         color: Colors.white,
-    //       ),
-    //     ),
-    //   );
-    // else
-    //   return const SizedBox.shrink();
-    return ThemeSwitcher(
-      builder: (context) {
-        return GestureDetector(
-          onTap: () {
-            final brightness = ThemeManager.of(context).currentTheme.brightness;
-
-            if (brightness == Brightness.dark) {
-              _riveArtboard!.addController(SimpleAnimation('sun'));
-              // ThemeSwitcher.of(context).changeTheme(data: Themes.lightTheme);
-            } else if (brightness == Brightness.light) {
-              _riveArtboard!.addController(SimpleAnimation('moon'));
-              // ThemeSwitcher.of(context).changeTheme(data: Themes.darkTheme);
-            }
-
-            ThemeSwitcher.of(context).toggleBrightness();
-          },
-          child: _riveArtboard != null
-              ? Rive(artboard: _riveArtboard!)
-              : const SizedBox.shrink(),
-        );
-      },
-    );
-  }
-}
-
-class NavDrawerState extends State<NavDrawer> {
-  final GlobalKey<ThemeSwitchState> _switcherKey = GlobalKey();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = ThemeManager.of(context).currentTheme;
-
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          DrawerHeader(
-            decoration: BoxDecoration(color: theme.drawerHeaderBackground),
-            child: Stack(
-              children: <Widget>[
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: RoundedAvatar(
-                    backgroundColor: Theme.of(context).accentColor,
-                    radius: 32,
-                    text: 'Влад',
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Container(
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.all(2.0),
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.25),
-                      shape: BoxShape.circle,
-                    ),
-                    child: ThemeSwitch(key: _switcherKey),
-                  ),
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    height: 40,
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                'Влад',
-                                style: TextStyle(
-                                  color: theme.drawerHeaderTitleColor,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              Text(
-                                '+380 (95) 558 44 80',
-                                style: TextStyle(
-                                  color: theme.drawerHeaderSubtitleColor,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildDrawerHeader(),
           _buildNavItem(
-            context: context,
-            onTap: () {},
             icon: AppIcons.new_group,
             iconSize: 18,
             label: 'New Group',
           ),
           _buildNavItem(
-            context: context,
-            onTap: () {},
             icon: AppIcons.contacts,
             iconSize: 18,
             label: 'Contacts',
           ),
           _buildNavItem(
-            context: context,
-            onTap: () {},
             icon: AppIcons.saved_messages,
             iconSize: 20,
             label: 'Saved Messages',
           ),
           _buildNavItem(
-            context: context,
-            onTap: () {},
             icon: AppIcons.settings,
             iconSize: 22,
             label: 'Settings',
           ),
           _buildNavItem(
-            context: context,
-            onTap: () {},
+            onTap: () async {
+              await _authService.logout();
+              Navigator.pushReplacementNamed(context, AppRoutes.Auth);
+            },
             icon: Icons.logout,
             iconSize: 22,
-            label: 'Sign out',
+            label: 'Log out',
             color: Colors.redAccent,
           ),
         ],
@@ -259,9 +111,128 @@ class NavDrawerState extends State<NavDrawer> {
     );
   }
 
+  Widget _buildDrawerHeader() {
+    final theme = ThemeManager.of(context).currentTheme;
+
+    return DrawerHeader(
+      padding: EdgeInsets.fromLTRB(16.0, 16.0, 14.0, 10.0),
+      decoration: BoxDecoration(color: theme.drawerHeaderBackground),
+      child: Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.topLeft,
+            child: widget.userDetails != null
+                ? RoundedAvatar(
+                    backgroundColor: Theme.of(context).accentColor,
+                    radius: 32,
+                    text: widget.userDetails!.firstName,
+                  )
+                : RoundedAvatar(
+                    backgroundColor: Colors.blueGrey.withOpacity(0.5),
+                    radius: 32,
+                  ),
+          ),
+          Align(
+            alignment: Alignment.topRight,
+            child: _buildThemeSwitcher(),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              height: 40,
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Builder(
+                      builder: (context) {
+                        if (widget.userDetails != null) {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                '${widget.userDetails!.firstName} ${widget.userDetails!.lastName}',
+                                style: TextStyle(
+                                  color: theme.drawerHeaderTitleColor,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              Text(
+                                _phoneNumberFormat != null
+                                    ? PhoneNumberMask.format(
+                                        text: widget.userDetails!.phoneNumber,
+                                        mask: _phoneNumberFormat!)
+                                    : widget.userDetails!.phoneNumber,
+                                style: TextStyle(
+                                  color: theme.drawerHeaderSubtitleColor,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          );
+                        } else {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    flex: 1,
+                                    child: Container(
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: Colors.blueGrey.withOpacity(0.5),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(12)),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: const SizedBox.shrink(),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: Colors.blueGrey.withOpacity(0.5),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(12)),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: const SizedBox.shrink(),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildNavItem({
-    required BuildContext context,
-    required VoidCallback onTap,
+    VoidCallback? onTap,
     required IconData icon,
     required double iconSize,
     required String label,
@@ -301,6 +272,52 @@ class NavDrawerState extends State<NavDrawer> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildThemeSwitcher() {
+    return Container(
+      alignment: Alignment.center,
+      padding: EdgeInsets.all(2.0),
+      width: 34.0,
+      height: 34.0,
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.15),
+        shape: BoxShape.circle,
+      ),
+      child: ThemeSwitcher(
+        builder: (context) {
+          return GestureDetector(
+            onTap: () {
+              final brightness =
+                  ThemeManager.of(context).currentTheme.brightness;
+
+              if (brightness == Brightness.dark)
+                _themeSwitcherController.forward(from: 0.0);
+              else if (brightness == Brightness.light)
+                _themeSwitcherController.reverse(from: 1.0);
+
+              ThemeSwitcher.of(context).toggleBrightness();
+            },
+            child: Lottie.asset(
+              'assets/lottie/theme_switcher.json',
+              controller: CurvedAnimation(
+                parent: _themeSwitcherController,
+                curve: Curves.easeInOutCubic,
+              ),
+              frameRate: FrameRate.max,
+              onLoaded: (composition) {
+                final brightness =
+                    ThemeManager.of(context).currentTheme.brightness;
+                if (brightness == Brightness.dark)
+                  _themeSwitcherController.value = 0.0;
+                else if (brightness == Brightness.light)
+                  _themeSwitcherController.value = 1.0;
+              },
+            ),
+          );
+        },
       ),
     );
   }

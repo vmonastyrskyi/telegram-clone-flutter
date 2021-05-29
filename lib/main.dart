@@ -1,14 +1,15 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/business_logic/view_models/theme_provider.dart';
-import 'package:telegram_clone_mobile/ui/themes/theme_provider.dart';
-
-import 'services/firebase/firebase_auth_service.dart';
-import 'ui/router.dart';
-import 'ui/themes/themes.dart';
+import 'package:telegram_clone_mobile/locator.dart';
+import 'package:telegram_clone_mobile/provider/theme_provider.dart';
+import 'package:telegram_clone_mobile/services/firebase/auth_service.dart';
+import 'package:telegram_clone_mobile/ui/router.dart';
+import 'package:telegram_clone_mobile/ui/themes/material_themes.dart';
+import 'package:telegram_clone_mobile/ui/themes/theme_manager.dart';
 
 void main() {
+  setupServices();
   WidgetsFlutterBinding.ensureInitialized();
   runApp(TelegramCloneApp());
 }
@@ -19,9 +20,8 @@ class TelegramCloneApp extends StatefulWidget {
 }
 
 class _TelegramCloneAppState extends State<TelegramCloneApp> {
-  late FirebaseAuthService firebaseAuthService;
 
-  String _initialRoute = AppRoutes.Home;
+  String _initialRoute = AppRoutes.Auth;
   bool _initialized = false;
   bool _error = false;
 
@@ -29,12 +29,12 @@ class _TelegramCloneAppState extends State<TelegramCloneApp> {
     try {
       await Firebase.initializeApp();
 
-      firebaseAuthService = FirebaseAuthService();
-
       setState(() {
         _initialized = true;
-        if (firebaseAuthService.isAuthenticated())
+
+        if (services.get<AuthService>().isAuthenticated()) {
           _initialRoute = AppRoutes.Home;
+        }
       });
     } catch (e) {
       setState(() => _error = true);
@@ -57,11 +57,8 @@ class _TelegramCloneAppState extends State<TelegramCloneApp> {
       return _SplashScreen();
     }
 
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        Provider<FirebaseAuthService>.value(value: firebaseAuthService),
-      ],
+    return ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
       child: _MainScreen(
         initialRoute: _initialRoute,
       ),
@@ -75,7 +72,7 @@ class _SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: Themes.darkTheme,
+      theme: MaterialThemes.darkTheme,
       home: Scaffold(
         body: Container(
           child: Center(
@@ -83,7 +80,8 @@ class _SplashScreen extends StatelessWidget {
               'Telegram',
               style: TextStyle(
                 fontSize: 18,
-                color: Theme.of(context).textTheme.headline1!.color,
+                fontWeight: FontWeight.w500,
+                color: Color.fromARGB(255, 250, 255, 255),
               ),
             ),
           ),
@@ -104,18 +102,6 @@ class _MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return ThemeManager(
-    //   duration: Duration(milliseconds: 500),
-    //   builder: (context, theme) {
-    //     return MaterialApp(
-    //       title: 'Telegram',
-    //       theme: theme,
-    //       initialRoute: initialRoute,
-    //       onGenerateRoute: RootRouter.generateRoute,
-    //       debugShowCheckedModeBanner: false,
-    //     );
-    //   },
-    // );
     return ThemeManager(
       builder: (context, theme) {
         return MaterialApp(

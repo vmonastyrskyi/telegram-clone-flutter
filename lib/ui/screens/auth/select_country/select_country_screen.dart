@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/business_logic/view_models/choose_country.dart';
+import 'package:telegram_clone_mobile/provider/select_country_provider.dart';
 import 'package:telegram_clone_mobile/util/multi_sliver.dart';
 
 import 'widgets/country_group_list_item.dart';
 import 'widgets/custom_app_bar.dart';
 import 'widgets/searched_country_list_item.dart';
 
-class ChooseCountryScreen extends StatelessWidget {
+class SelectCountryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(),
-      body: Consumer<ChooseCountryProvider>(
+      body: Consumer<SelectCountryProvider>(
         builder: (_, chooseCountry, __) {
           final countriesGroups = chooseCountry.countriesGroups;
           final searchedCountries = chooseCountry.searchedCountries;

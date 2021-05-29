@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/business_logic/view_models/choose_country.dart';
+import 'package:telegram_clone_mobile/provider/select_country_provider.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/appbar_icon_button.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -42,7 +42,7 @@ class _CustomAppBarState extends State<CustomAppBar>
   @override
   Widget build(BuildContext context) {
     final enableCountrySearch = context.select(
-        (ChooseCountryProvider chooseCountry) =>
+        (SelectCountryProvider chooseCountry) =>
             chooseCountry.enableCountrySearch);
 
     return AppBar(
@@ -99,7 +99,7 @@ class _CustomAppBarState extends State<CustomAppBar>
                 _clearButtonController.reverse().whenComplete(() {
                   setState(() => _showClearButton = false);
                 });
-                context.read<ChooseCountryProvider>().clearSearchedCountries();
+                context.read<SelectCountryProvider>().clearSearchedCountries();
               }),
       ],
     );
@@ -133,7 +133,7 @@ class _CustomAppBarState extends State<CustomAppBar>
                   _clearButtonController.forward();
               }
               context
-                  .read<ChooseCountryProvider>()
+                  .read<SelectCountryProvider>()
                   .findCountryByName(value.trim());
             },
             autofocus: true,
@@ -162,7 +162,7 @@ class _CustomAppBarState extends State<CustomAppBar>
 
   void _toggleCountrySearch(bool value) {
     setState(() => _showClearButton = false);
-    context.read<ChooseCountryProvider>().enableCountrySearch = value;
+    context.read<SelectCountryProvider>().enableCountrySearch = value;
     _countrySearchController.clear();
   }
 }

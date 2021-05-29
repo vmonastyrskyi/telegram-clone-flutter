@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:telegram_clone_mobile/ui/screens/auth/choose_country/choose_country_screen.dart';
 import 'package:telegram_clone_mobile/ui/screens/auth/input_phone/input_phone_screen.dart';
 import 'package:telegram_clone_mobile/ui/screens/auth/phone_verification/phone_verification_screen.dart';
+import 'package:telegram_clone_mobile/ui/screens/auth/select_country/select_country_screen.dart';
 import 'package:telegram_clone_mobile/util/slide_left_with_fade_route.dart';
 
 abstract class AuthRoutes {
   static const String InputPhone = 'input-phone';
-  static const String ChooseCountry = 'choose-country';
+  static const String SelectCountry = 'select-country';
   static const String PhoneVerification = 'phone-verification';
 }
 
@@ -18,14 +18,17 @@ class AuthRouter {
           builder: (context) => InputPhoneScreen(),
           slideDirection: SlideDirection.rightToLeft,
         );
-      case AuthRoutes.ChooseCountry:
+      case AuthRoutes.SelectCountry:
         return SlideWithFadeRoute(
-          builder: (context) => ChooseCountryScreen(),
+          builder: (context) => SelectCountryScreen(),
         );
       case AuthRoutes.PhoneVerification:
         final args = settings.arguments as PhoneVerificationArgs;
         return SlideWithFadeRoute(
-          builder: (context) => PhoneVerificationScreen(phone: args.phone),
+          builder: (context) => PhoneVerificationScreen(
+            localPhoneNumber: args.localPhoneNumber,
+            formattedPhoneNumber: args.formattedPhoneNumber,
+          ),
         );
       default:
         return SlideWithFadeRoute(

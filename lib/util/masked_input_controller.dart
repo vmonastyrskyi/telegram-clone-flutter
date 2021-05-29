@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
-class MaskedTextController extends TextEditingController {
-  static Map<String, RegExp> defaultFilter = {
-    'A': RegExp(r'[A-Za-z]'),
-    '0': RegExp(r'[0-9]'),
-    '@': RegExp(r'[A-Za-z0-9]'),
-    '*': RegExp(r'.*')
+class MaskedInputController extends TextEditingController {
+  static Map<String, RegExp> _defaultFilter = {
+    '&': RegExp('[A-Za-zА-Яа-я]'),
+    '#': RegExp('[0-9]'),
+    '@': RegExp('[A-Za-zА-Яа-я0-9]'),
+    '*': RegExp('.*')
   };
 
-  MaskedTextController({
+  MaskedInputController({
     String? text,
     required this.mask,
     Map<String, RegExp>? filter,
   }) : super(text: text) {
-    this.filter = filter ?? defaultFilter;
+    this.filter = filter ?? _defaultFilter;
 
     addListener(() {
       formatText(this.text);
@@ -53,22 +53,26 @@ class MaskedTextController extends TextEditingController {
   }
 
   String _applyMask(String mask, String value) {
-    String result = '';
+    final result = StringBuffer();
 
     var maskCharIndex = 0;
     var valueCharIndex = 0;
     var filter = this.filter!;
 
     while (true) {
-      if (maskCharIndex == mask.length) break;
+      if (maskCharIndex == mask.length) {
+        break;
+      }
 
-      if (valueCharIndex == value.length) break;
+      if (valueCharIndex == value.length) {
+        break;
+      }
 
       var maskChar = mask[maskCharIndex];
       var valueChar = value[valueCharIndex];
 
       if (maskChar == valueChar) {
-        result += maskChar;
+        result.write(maskChar);
         valueCharIndex += 1;
         maskCharIndex += 1;
         continue;
@@ -76,7 +80,7 @@ class MaskedTextController extends TextEditingController {
 
       if (filter.containsKey(maskChar)) {
         if (filter[maskChar]!.hasMatch(valueChar)) {
-          result += valueChar;
+          result.write(valueChar);
           maskCharIndex += 1;
         }
 
@@ -84,11 +88,11 @@ class MaskedTextController extends TextEditingController {
         continue;
       }
 
-      result += maskChar;
+      result.write(maskChar);
       maskCharIndex += 1;
       continue;
     }
 
-    return result;
+    return result.toString();
   }
 }

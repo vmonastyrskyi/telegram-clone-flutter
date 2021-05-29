@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/business_logic/view_models/choose_country.dart';
+import 'package:telegram_clone_mobile/provider/select_country_provider.dart';
 import 'package:telegram_clone_mobile/ui/screens/auth/router.dart';
 
 class AuthScreen extends StatelessWidget {
@@ -9,7 +9,7 @@ class AuthScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => ChooseCountryProvider(),
+      create: (context) => SelectCountryProvider(),
       child: Navigator(
         onGenerateRoute: AuthRouter.generateRoute,
         initialRoute: AuthRoutes.InputPhone,

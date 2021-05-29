@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:telegram_clone_mobile/provider/theme_provider.dart';
 
-import 'theme_provider.dart';
+import 'theme_manager.dart';
 import 'theme_switcher_circle_clipper.dart';
 
 class ThemeSwitcherArea extends StatefulWidget {
@@ -24,13 +25,15 @@ class _ThemeSwitcherAreaState extends State<ThemeSwitcherArea>
   bool _themeChanging = false;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _currentTheme = ThemeManager.of(context).currentTheme.data;
-    _circularController = AnimationController(
-      duration: ThemeManager.of(context).duration,
-      vsync: this,
-    );
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _currentTheme = ThemeManager.of(context).currentTheme;
+      _circularController = AnimationController(
+        duration: ThemeManager.of(context).duration,
+        vsync: this,
+      );
+    });
   }
 
   @override
@@ -39,13 +42,16 @@ class _ThemeSwitcherAreaState extends State<ThemeSwitcherArea>
     super.dispose();
   }
 
-  ThemeData? _currentTheme;
+  AppTheme? _currentTheme;
   Offset? _switcherOffset;
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeManager.of(context).currentTheme.data;
-    final child = _updateChildWithTheme(theme);
+    final theme = ThemeManager.of(context).currentTheme;
+    final child = Builder(
+      key: _globalKey,
+      builder: (_) => widget.child,
+    );
 
     if (_currentTheme == null || _currentTheme == theme) {
       return child;
@@ -71,14 +77,6 @@ class _ThemeSwitcherAreaState extends State<ThemeSwitcherArea>
     }
   }
 
-  Widget _updateChildWithTheme(ThemeData data) {
-    return Theme(
-      key: _globalKey,
-      data: data,
-      child: widget.child,
-    );
-  }
-
   void _getSwitcherCoordinates() {
     final renderObject = ThemeManager.of(context)
         .switcherGlobalKey!
@@ -88,13 +86,13 @@ class _ThemeSwitcherAreaState extends State<ThemeSwitcherArea>
 
     _switcherOffset = renderObject
         .localToGlobal(Offset.zero)
-        .translate(size.width / 2, size.height / 2);
+        .translate(size.width / 2.0, size.height / 2.0);
   }
 
   @override
   void didUpdateWidget(ThemeSwitcherArea oldWidget) {
     super.didUpdateWidget(oldWidget);
-    var theme = ThemeManager.of(context).currentTheme.data;
+    final theme = ThemeManager.of(context).currentTheme;
     if (!_themeChanging && theme != _currentTheme) {
       _themeChanging = true;
       _getSwitcherCoordinates();
@@ -102,7 +100,7 @@ class _ThemeSwitcherAreaState extends State<ThemeSwitcherArea>
     }
   }
 
-  void _runAnimation(ThemeData? theme) async {
+  void _runAnimation(AppTheme? theme) async {
     await _circularController.forward(from: 0.0);
 
     setState(() {

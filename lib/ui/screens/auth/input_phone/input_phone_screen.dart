@@ -1,16 +1,19 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/business_logic/models/country.dart';
-import 'package:telegram_clone_mobile/business_logic/view_models/choose_country.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:telegram_clone_mobile/constants/shared_preferences.dart';
+import 'package:telegram_clone_mobile/models/country.dart';
+import 'package:telegram_clone_mobile/provider/select_country_provider.dart';
 import 'package:telegram_clone_mobile/ui/screens/auth/phone_verification/phone_verification_screen.dart';
 import 'package:telegram_clone_mobile/ui/screens/auth/router.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/modal.dart';
 import 'package:telegram_clone_mobile/util/curves/sine_curve.dart';
-import 'package:telegram_clone_mobile/util/masked_text_controller.dart';
+import 'package:telegram_clone_mobile/util/masked_input_controller.dart';
 import 'package:vibration/vibration.dart';
 
 class InputPhoneScreen extends StatefulWidget {
@@ -31,9 +34,9 @@ class _InputPhoneScreenState extends State<InputPhoneScreen>
 
   final TextEditingController _countryCodeInputController =
       TextEditingController();
-  final MaskedTextController _phoneInputController =
-      MaskedTextController(mask: _kDefaultPhoneMask, filter: {
-    '#': RegExp(r'[0-9]'),
+  final MaskedInputController _phoneInputController =
+      MaskedInputController(mask: _kDefaultPhoneMask, filter: {
+    '#': RegExp('[0-9]'),
   });
   final PhoneMaskPainter _maskPainter = PhoneMaskPainter();
 
@@ -51,6 +54,24 @@ class _InputPhoneScreenState extends State<InputPhoneScreen>
         Tween<Offset>(begin: Offset(0.0125, 0.0), end: Offset.zero)
             .chain(CurveTween(curve: SineCurve(waves: 3)))
             .animate(_phoneAnimationController);
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _autofillInputs();
+    });
+  }
+
+  void _autofillInputs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final selectedCountryJson =
+        prefs.getString(SharedPrefsConstants.kSelectedCountry);
+    if (selectedCountryJson != null) {
+      final selectedCountry = Country.fromJson(jsonDecode(selectedCountryJson));
+      context.read<SelectCountryProvider>().selectedCountry = selectedCountry;
+
+      final phoneNumber = prefs.getString(SharedPrefsConstants.kPhoneNumber);
+      if (phoneNumber != null) {
+        _phoneInputController.text = phoneNumber;
+      }
+    }
   }
 
   @override
@@ -74,7 +95,7 @@ class _InputPhoneScreenState extends State<InputPhoneScreen>
           horizontal: 18.0,
           vertical: 32.0,
         ),
-        child: Consumer<ChooseCountryProvider>(
+        child: Consumer<SelectCountryProvider>(
           builder: (_, provider, __) {
             Country? selectedCountry = provider.selectedCountry;
             if (selectedCountry != null) {
@@ -134,10 +155,14 @@ class _InputPhoneScreenState extends State<InputPhoneScreen>
                   'Invalid phone number. Please check the number and try again.',
             );
           } else {
-            final title =
+            final localPhoneNumber =
+                _phoneInputController.text.replaceAll(RegExp('[^0-9]'), '');
+            final formattedPhoneNumber =
                 '+${_countryCodeInputController.text} ${_phoneInputController.text}';
-            final args = PhoneVerificationArgs(title);
-
+            final args = PhoneVerificationArgs(
+              localPhoneNumber: localPhoneNumber,
+              formattedPhoneNumber: formattedPhoneNumber,
+            );
             Navigator.of(context)
                 .pushNamed(AuthRoutes.PhoneVerification, arguments: args);
           }
@@ -206,7 +231,7 @@ class _InputPhoneScreenState extends State<InputPhoneScreen>
 
   Widget _buildChooseCountryButton() {
     return InkWell(
-      onTap: () => Navigator.pushNamed(context, AuthRoutes.ChooseCountry),
+      onTap: () => Navigator.pushNamed(context, AuthRoutes.SelectCountry),
       borderRadius: const BorderRadius.all(Radius.circular(4.0)),
       child: Container(
         padding: const EdgeInsets.fromLTRB(4.0, 1.0, 4.0, 3.0),
@@ -290,16 +315,16 @@ class _InputPhoneScreenState extends State<InputPhoneScreen>
   void _handleCodeInput(String text) {
     if (text.isNotEmpty) {
       Country? country = context
-          .read<ChooseCountryProvider>()
+          .read<SelectCountryProvider>()
           .findCountryByCode(int.parse(text));
       if (country != null)
         setState(() => _selectedCountryName = country.name);
       else
         setState(() => _selectedCountryName = 'Invalid country code');
-      context.read<ChooseCountryProvider>().selectedCountry = country;
+      context.read<SelectCountryProvider>().selectedCountry = country;
     } else {
       setState(() => _selectedCountryName = 'Choose a country');
-      context.read<ChooseCountryProvider>().selectedCountry = null;
+      context.read<SelectCountryProvider>().selectedCountry = null;
     }
   }
 

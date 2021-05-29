@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:telegram_clone_mobile/util/custom_ink_splash.dart';
 
-class Themes {
+class MaterialThemes {
   static ThemeData get lightTheme {
     return ThemeData(
       appBarTheme: AppBarTheme(
@@ -9,8 +9,6 @@ class Themes {
         elevation: 1.5,
       ),
       primaryColor: Color.fromARGB(255, 81, 125, 162),
-      primaryColorDark: Color.fromARGB(255, 90, 143, 187),
-      // primaryColorDark: Color.fromARGB(255, 66, 99, 130),
       primaryColorLight: Color.fromARGB(255, 90, 143, 187),
       accentColor: Color.fromARGB(255, 102, 169, 224),
       splashFactory: CustomInkSplash.splashFactory,
@@ -51,7 +49,6 @@ class Themes {
         elevation: 1.5,
       ),
       primaryColor: Color.fromARGB(255, 31, 43, 55),
-      primaryColorDark: Color.fromARGB(255, 25, 33, 44),
       primaryColorLight: Color.fromARGB(255, 59, 93, 128),
       accentColor: Color.fromARGB(255, 90, 158, 207),
       splashFactory: CustomInkSplash.splashFactory,

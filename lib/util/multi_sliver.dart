@@ -12,9 +12,7 @@ class MultiSliver extends MultiChildRenderObjectWidget {
 
   @override
   RenderMultiSliver createRenderObject(BuildContext context) =>
-      RenderMultiSliver(
-        containing: pushPinnedChildren,
-      );
+      RenderMultiSliver(containing: pushPinnedChildren);
 
   @override
   void updateRenderObject(

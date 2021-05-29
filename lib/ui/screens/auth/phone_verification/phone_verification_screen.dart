@@ -1,7 +1,15 @@
+import 'dart:convert';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/services/firebase/firebase_auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:telegram_clone_mobile/constants/shared_preferences.dart';
+import 'package:telegram_clone_mobile/locator.dart';
+import 'package:telegram_clone_mobile/provider/select_country_provider.dart';
+import 'package:telegram_clone_mobile/services/firebase/auth_service.dart';
+import 'package:telegram_clone_mobile/ui/router.dart';
 import 'package:telegram_clone_mobile/ui/screens/auth/phone_verification/widgets/otp_form.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/appbar_icon_button.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/modal.dart';
@@ -9,17 +17,23 @@ import 'package:telegram_clone_mobile/util/curves/sine_curve.dart';
 import 'package:vibration/vibration.dart';
 
 class PhoneVerificationArgs {
-  final String phone;
+  final String localPhoneNumber;
+  final String formattedPhoneNumber;
 
-  PhoneVerificationArgs(this.phone);
+  PhoneVerificationArgs({
+    required this.localPhoneNumber,
+    required this.formattedPhoneNumber,
+  });
 }
 
 class PhoneVerificationScreen extends StatefulWidget {
-  final String phone;
+  final String localPhoneNumber;
+  final String formattedPhoneNumber;
 
   const PhoneVerificationScreen({
     Key? key,
-    required this.phone,
+    required this.localPhoneNumber,
+    required this.formattedPhoneNumber,
   }) : super(key: key);
 
   @override
@@ -35,6 +49,8 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
   static const int _kOtpCodeLength = 6;
 
   final GlobalKey<OtpFormState> _otpFormKey = GlobalKey();
+
+  final AuthService _authService = services.get<AuthService>();
 
   late final AnimationController _otpInputAnimationController;
   late final Animation<Offset> _otpInputPosition;
@@ -52,7 +68,6 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
     _otpInputPosition = Tween(begin: Offset(0.0125, 0.0), end: Offset.zero)
         .chain(CurveTween(curve: SineCurve(waves: 3)))
         .animate(_otpInputAnimationController);
-
     _signInWithPhoneNumber();
   }
 
@@ -67,11 +82,12 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(widget.phone),
-        elevation: 1.5,
+        title: Text(widget.formattedPhoneNumber),
         leading: AppBarIconButton(
           icon: Icons.arrow_back,
-          onTap: () => Navigator.of(context).pop(),
+          onTap: () {
+            Navigator.of(context).pop();
+          },
         ),
       ),
       body: Container(
@@ -85,7 +101,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
               width: 64.0,
               height: 64.0,
               child: const Image(
-                image: AssetImage('assets/images/phone_sms.png'),
+                image: const AssetImage('assets/images/phone_sms.png'),
               ),
             ),
             Padding(
@@ -120,11 +136,13 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
                   onSubmit: (code) async {
                     if (verificationId != null) {
                       print('Sign in with code $code');
-                      // TODO: uncomment
-                      // final credential = PhoneAuthProvider.credential(
-                      //     verificationId: verificationId!, smsCode: code);
-                      // context.read<FirebaseAuthService>().signInWithCredentials(
-                      //     credential);
+                      final credential = PhoneAuthProvider.credential(
+                          verificationId: verificationId!, smsCode: code);
+                      await _authService.signInWithCredential(credential);
+                      await _saveInputsData();
+
+                      Navigator.of(context, rootNavigator: true)
+                          .pushReplacementNamed(AppRoutes.Home);
                     } else {
                       print('Invalid verificationId.');
                       await _showAlert(
@@ -169,16 +187,29 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
     );
   }
 
+  Future<void> _saveInputsData() async {
+    final selectedCountry =
+        context.read<SelectCountryProvider>().selectedCountry;
+    if (selectedCountry != null) {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString(
+          SharedPrefsConstants.kSelectedCountry, jsonEncode(selectedCountry));
+      prefs.setString(
+          SharedPrefsConstants.kPhoneNumber, widget.localPhoneNumber);
+    }
+  }
+
   void _signInWithPhoneNumber() {
-    context.read<FirebaseAuthService>().signInWithPhoneNumber(
-      widget.phone,
+    _authService.signInWithPhoneNumber(
+      widget.formattedPhoneNumber,
       verificationCompleted: (credential) async {
         if (mounted) {
           if (credential.smsCode != null) {
             print('Auto verification completed.');
             _otpFormKey.currentState!.fillAndDisable(credential.smsCode!);
-            // TODO: uncomment
-            // await context.read<FirebaseAuthService>().signInWithCredentials(credential);
+            await _authService.signInWithCredential(credential);
+            Navigator.of(context, rootNavigator: true)
+                .pushReplacementNamed(AppRoutes.Home);
           }
         }
       },

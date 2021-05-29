@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/business_logic/models/country.dart';
-import 'package:telegram_clone_mobile/business_logic/view_models/choose_country.dart';
+import 'package:telegram_clone_mobile/models/country.dart';
+import 'package:telegram_clone_mobile/provider/select_country_provider.dart';
 import 'package:telegram_clone_mobile/util/sticky_sliver.dart';
 
 class CountryGroupListItem extends StatelessWidget {
@@ -51,7 +51,7 @@ class CountryGroupListItem extends StatelessWidget {
               height: 50,
               child: InkWell(
                 onTap: () {
-                  context.read<ChooseCountryProvider>().selectCountry(country);
+                  context.read<SelectCountryProvider>().selectCountry(country);
                   Navigator.of(context).pop();
                 },
                 child: Padding(
