@@ -2,14 +2,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:telegram_clone_mobile/locator.dart';
-import 'package:telegram_clone_mobile/provider/theme_provider.dart';
-import 'package:telegram_clone_mobile/services/firebase/auth_service.dart';
+import 'package:telegram_clone_mobile/ui/theming/theme_provider.dart';
+import 'package:telegram_clone_mobile/services/auth_service.dart';
 import 'package:telegram_clone_mobile/ui/router.dart';
-import 'package:telegram_clone_mobile/ui/themes/material_themes.dart';
-import 'package:telegram_clone_mobile/ui/themes/theme_manager.dart';
+import 'package:telegram_clone_mobile/ui/theming/material_themes.dart';
+import 'package:telegram_clone_mobile/ui/theming/theme_manager.dart';
 
 void main() {
-  setupServices();
   WidgetsFlutterBinding.ensureInitialized();
   runApp(TelegramCloneApp());
 }
@@ -20,7 +19,6 @@ class TelegramCloneApp extends StatefulWidget {
 }
 
 class _TelegramCloneAppState extends State<TelegramCloneApp> {
-
   String _initialRoute = AppRoutes.Auth;
   bool _initialized = false;
   bool _error = false;
@@ -29,10 +27,12 @@ class _TelegramCloneAppState extends State<TelegramCloneApp> {
     try {
       await Firebase.initializeApp();
 
+      setupLocator();
+
       setState(() {
         _initialized = true;
 
-        if (services.get<AuthService>().isAuthenticated()) {
+        if (locator<AuthService>().isAuthenticated()) {
           _initialRoute = AppRoutes.Home;
         }
       });

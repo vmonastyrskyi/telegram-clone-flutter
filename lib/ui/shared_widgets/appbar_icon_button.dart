@@ -9,7 +9,7 @@ class AppBarIconButton extends StatelessWidget {
     this.iconSize = 24,
     this.contentPadding = const EdgeInsets.all(8),
     this.margin = const EdgeInsets.symmetric(horizontal: 4),
-    this.splash = true,
+    this.splashEffect = true,
   }) : super(key: key);
 
   final IconData icon;
@@ -18,14 +18,14 @@ class AppBarIconButton extends StatelessWidget {
   final double iconSize;
   final EdgeInsetsGeometry contentPadding;
   final EdgeInsetsGeometry margin;
-  final bool splash;
+  final bool splashEffect;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: margin,
       child: Center(
-        child: splash
+        child: splashEffect
             ? InkWell(
                 customBorder: CircleBorder(),
                 onTap: onTap,

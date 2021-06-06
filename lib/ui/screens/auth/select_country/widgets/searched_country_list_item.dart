@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:telegram_clone_mobile/constants/widgets.dart';
 import 'package:telegram_clone_mobile/models/country.dart';
-import 'package:telegram_clone_mobile/provider/select_country_provider.dart';
 
 class SearchedCountryListItem extends StatelessWidget {
   const SearchedCountryListItem({
@@ -18,14 +17,11 @@ class SearchedCountryListItem extends StatelessWidget {
     return Stack(
       children: <Widget>[
         Container(
-          height: 50,
+          height: WidgetsConstants.kCountryListItemHeight,
           child: InkWell(
-            onTap: () {
-              context.read<SelectCountryProvider>().selectCountry(country);
-              Navigator.of(context).pop();
-            },
+            onTap: () => Navigator.of(context).pop(country),
             child: Padding(
-              padding: const EdgeInsets.only(left: 20, right: 18),
+              padding: const EdgeInsets.only(left: 20.0, right: 18.0),
               child: Row(
                 children: <Widget>[
                   Expanded(
@@ -33,7 +29,7 @@ class SearchedCountryListItem extends StatelessWidget {
                       country.name,
                       style: TextStyle(
                         color: Theme.of(context).textTheme.headline1!.color,
-                        fontSize: 17,
+                        fontSize: 17.0,
                         fontWeight: FontWeight.normal,
                       ),
                     ),
@@ -42,7 +38,7 @@ class SearchedCountryListItem extends StatelessWidget {
                     '+${country.code}',
                     style: TextStyle(
                       color: Theme.of(context).accentColor,
-                      fontSize: 17,
+                      fontSize: 17.0,
                       fontWeight: FontWeight.normal,
                     ),
                   ),
@@ -53,13 +49,10 @@ class SearchedCountryListItem extends StatelessWidget {
         ),
         if (showDivider)
           Positioned(
-            left: 20,
-            right: 0,
-            bottom: 0,
-            child: Divider(
-              height: 1,
-              color: Theme.of(context).dividerColor,
-            ),
+            left: 20.0,
+            right: 0.0,
+            bottom: 0.0,
+            child: Divider(height: 0.5),
           )
       ],
     );

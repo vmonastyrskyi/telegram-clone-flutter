@@ -3,17 +3,21 @@ import 'package:flutter/material.dart';
 class RoundedAvatar extends StatelessWidget {
   const RoundedAvatar({
     Key? key,
+    this.icon,
     this.image,
     this.text,
     this.textStyle,
     this.child,
     this.onTap,
-    this.radius = 24,
-    this.padding = const EdgeInsets.all(8),
+    this.radius = 24.0,
+    this.padding = const EdgeInsets.all(8.0),
     this.backgroundColor = Colors.white,
     this.textColor = Colors.white,
+    this.iconColor = Colors.white,
+    this.iconSize = 24.0,
   }) : super(key: key);
 
+  final IconData? icon;
   final ImageProvider? image;
   final String? text;
   final TextStyle? textStyle;
@@ -22,6 +26,8 @@ class RoundedAvatar extends StatelessWidget {
   final double radius;
   final Color backgroundColor;
   final Color textColor;
+  final Color iconColor;
+  final double iconSize;
   final EdgeInsetsGeometry padding;
 
   @override
@@ -41,14 +47,23 @@ class RoundedAvatar extends StatelessWidget {
         ),
         child: Builder(
           builder: (_) {
-            if (image != null)
-              return Image(
-                image: image!,
+            if (image != null) {
+              return Image(image: image!);
+            }
+
+            if (icon != null) {
+              return Icon(
+                icon,
+                color: iconColor,
+                size: iconSize,
               );
+            }
 
-            if (child != null) return child!;
+            if (child != null) {
+              return child!;
+            }
 
-            if (text != null)
+            if (text != null) {
               return Text(
                 textToDisplay!,
                 style: textStyle ??
@@ -58,6 +73,7 @@ class RoundedAvatar extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
               );
+            }
 
             return SizedBox.shrink();
           },

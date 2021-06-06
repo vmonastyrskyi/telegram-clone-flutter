@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:telegram_clone_mobile/constants/widgets.dart';
 import 'package:telegram_clone_mobile/models/country.dart';
-import 'package:telegram_clone_mobile/provider/select_country_provider.dart';
 import 'package:telegram_clone_mobile/util/sticky_sliver.dart';
 
 class CountryGroupListItem extends StatelessWidget {
@@ -26,14 +25,14 @@ class CountryGroupListItem extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: Container(
         padding: const EdgeInsets.only(left: 6.0),
-        height: 50,
-        width: 50,
+        width: WidgetsConstants.kCountryListItemHeight,
+        height: WidgetsConstants.kCountryListItemHeight,
         child: Center(
           child: Text(
             countryGroup.group,
             style: TextStyle(
               color: Theme.of(context).textTheme.headline3!.color,
-              fontSize: 22,
+              fontSize: 22.0,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -46,16 +45,13 @@ class CountryGroupListItem extends StatelessWidget {
     return SliverList(
       delegate: SliverChildListDelegate(
         <Widget>[
-          for (var country in countryGroup.countries)
+          for (final country in countryGroup.countries)
             Container(
-              height: 50,
+              height: WidgetsConstants.kCountryListItemHeight,
               child: InkWell(
-                onTap: () {
-                  context.read<SelectCountryProvider>().selectCountry(country);
-                  Navigator.of(context).pop();
-                },
+                onTap: () => Navigator.of(context).pop(country),
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 72, right: 36),
+                  padding: const EdgeInsets.only(left: 72.0, right: 36.0),
                   child: Row(
                     children: <Widget>[
                       Expanded(
@@ -63,7 +59,7 @@ class CountryGroupListItem extends StatelessWidget {
                           country.name,
                           style: TextStyle(
                             color: Theme.of(context).textTheme.headline1!.color,
-                            fontSize: 17,
+                            fontSize: 17.0,
                             fontWeight: FontWeight.normal,
                           ),
                         ),
@@ -72,7 +68,7 @@ class CountryGroupListItem extends StatelessWidget {
                         '+${country.code}',
                         style: TextStyle(
                           color: Theme.of(context).accentColor,
-                          fontSize: 17,
+                          fontSize: 17.0,
                           fontWeight: FontWeight.normal,
                         ),
                       ),

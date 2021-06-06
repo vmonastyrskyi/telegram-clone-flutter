@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/provider/theme_provider.dart';
+import 'package:telegram_clone_mobile/ui/theming/theme_provider.dart';
 
 import 'theme_switcher.dart';
 
@@ -77,13 +77,11 @@ class ThemeManagerState extends State<ThemeManager> {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<ThemeProvider, AppTheme>(
-      selector: (_, provider) => provider.theme,
-      builder: (context, theme, _) {
-        print('changed');
+    return Consumer<ThemeProvider>(
+      builder: (context, provider, _) {
         return RepaintBoundary(
           key: _repaintBoundaryKey,
-          child: widget.builder(context, theme.data),
+          child: widget.builder(context, provider.theme.data),
         );
       },
     );

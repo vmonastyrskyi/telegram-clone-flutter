@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:telegram_clone_mobile/models/user_details.dart';
 import 'package:telegram_clone_mobile/locator.dart';
-import 'package:telegram_clone_mobile/services/firebase/user_service.dart';
+import 'package:telegram_clone_mobile/models/user_details.dart';
+import 'package:telegram_clone_mobile/services/user_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -40,18 +40,20 @@ class AuthService {
   Future<void> signInWithCredential(PhoneAuthCredential credential) async {
     final userCredentials = await _auth.signInWithCredential(credential);
 
+    // TODO: Change to Cloud Function
     if (userCredentials.additionalUserInfo!.isNewUser) {
       final username = _generateUsername();
 
-      await services.get<UserService>().addUser(
+      await locator<UserService>().addUser(
             userId: userCredentials.user!.uid,
-            details: UserDetails.fromJson({
-              'username': username,
-              'first_name': username,
-              'last_name': '',
-              'phone_number': _auth.currentUser!.phoneNumber,
-              'online_status': true,
-            }),
+            details: UserDetails(
+              username: username,
+              firstName: username,
+              lastName: '',
+              phoneNumber: _auth.currentUser!.phoneNumber!,
+              online: true,
+              chats: []
+            ),
           );
     }
   }

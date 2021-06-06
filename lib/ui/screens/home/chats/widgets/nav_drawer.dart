@@ -1,29 +1,21 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:telegram_clone_mobile/constants/shared_preferences.dart';
-import 'package:telegram_clone_mobile/models/country.dart';
-import 'package:telegram_clone_mobile/models/user_details.dart';
-import 'package:telegram_clone_mobile/locator.dart';
-import 'package:telegram_clone_mobile/services/firebase/auth_service.dart';
+import 'package:provider/provider.dart';
 import 'package:telegram_clone_mobile/ui/icons/app_icons.dart';
 import 'package:telegram_clone_mobile/ui/router.dart';
+import 'package:telegram_clone_mobile/ui/screens/home/router.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/rounded_avatar.dart';
-import 'package:telegram_clone_mobile/ui/themes/theme_manager.dart';
-import 'package:telegram_clone_mobile/ui/themes/theme_switcher.dart';
-import 'package:telegram_clone_mobile/util/phone_number_mask.dart';
+import 'package:telegram_clone_mobile/ui/theming/theme_manager.dart';
+import 'package:telegram_clone_mobile/ui/theming/theme_switcher.dart';
+import 'package:telegram_clone_mobile/view_models/home/chats/nav_drawer_viewmodel.dart';
+import 'package:telegram_clone_mobile/view_models/home/home_viewmodel.dart';
+
+import '../strings.dart';
 
 class NavDrawer extends StatefulWidget {
-  NavDrawer({
-    Key? key,
-    this.userDetails,
-  }) : super(key: key);
-
-  final UserDetails? userDetails;
+  NavDrawer({Key? key}) : super(key: key);
 
   @override
   NavDrawerState createState() => NavDrawerState();
@@ -33,11 +25,7 @@ class NavDrawerState extends State<NavDrawer>
     with SingleTickerProviderStateMixin {
   static const int _kThemeSwitchingDuration = 700;
 
-  final AuthService _authService = services.get<AuthService>();
-
   late final AnimationController _themeSwitcherController;
-
-  String? _phoneNumberFormat;
 
   @override
   void initState() {
@@ -46,21 +34,6 @@ class NavDrawerState extends State<NavDrawer>
       duration: Duration(milliseconds: _kThemeSwitchingDuration),
       vsync: this,
     );
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      _loadPhoneNumberFormat();
-    });
-  }
-
-  void _loadPhoneNumberFormat() async {
-    final prefs = await SharedPreferences.getInstance();
-    final selectedCountryJson =
-        prefs.getString(SharedPrefsConstants.kSelectedCountry);
-    if (selectedCountryJson != null) {
-      final selectedCountry = Country.fromJson(jsonDecode(selectedCountryJson));
-      setState(() {
-        _phoneNumberFormat = selectedCountry.format;
-      });
-    }
   }
 
   @override
@@ -78,32 +51,38 @@ class NavDrawerState extends State<NavDrawer>
           _buildDrawerHeader(),
           _buildNavItem(
             icon: AppIcons.new_group,
-            iconSize: 18,
-            label: 'New Group',
+            iconSize: 18.0,
+            label: ChatsStrings.kNavItemNewGroupLabel,
           ),
           _buildNavItem(
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushNamed(HomeRoutes.Contacts);
+            },
             icon: AppIcons.contacts,
-            iconSize: 18,
-            label: 'Contacts',
+            iconSize: 18.0,
+            label: ChatsStrings.kNavItemContactsLabel,
           ),
           _buildNavItem(
             icon: AppIcons.saved_messages,
-            iconSize: 20,
-            label: 'Saved Messages',
+            iconSize: 20.0,
+            label: ChatsStrings.kNavItemSavedMessagesLabel,
           ),
           _buildNavItem(
             icon: AppIcons.settings,
-            iconSize: 22,
-            label: 'Settings',
+            iconSize: 22.0,
+            label: ChatsStrings.kNavItemSettingsLabel,
           ),
+          Divider(height: 0.5),
           _buildNavItem(
             onTap: () async {
-              await _authService.logout();
-              Navigator.pushReplacementNamed(context, AppRoutes.Auth);
+              await context.read<NavDrawerViewModel>().logout();
+              Navigator.of(context, rootNavigator: true)
+                  .pushReplacementNamed(AppRoutes.Auth);
             },
             icon: Icons.logout,
-            iconSize: 22,
-            label: 'Log out',
+            iconSize: 22.0,
+            label: ChatsStrings.kNavItemLogoutLabel,
             color: Colors.redAccent,
           ),
         ],
@@ -113,23 +92,26 @@ class NavDrawerState extends State<NavDrawer>
 
   Widget _buildDrawerHeader() {
     final theme = ThemeManager.of(context).currentTheme;
+    final userDetails = context.read<HomeViewModel>().userDetails;
+    final formattedPhoneNumber =
+        context.read<HomeViewModel>().formattedPhoneNumber;
 
     return DrawerHeader(
-      padding: EdgeInsets.fromLTRB(16.0, 16.0, 14.0, 10.0),
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 14.0, 10.0),
       decoration: BoxDecoration(color: theme.drawerHeaderBackground),
       child: Stack(
         children: <Widget>[
           Align(
             alignment: Alignment.topLeft,
-            child: widget.userDetails != null
+            child: userDetails != null
                 ? RoundedAvatar(
                     backgroundColor: Theme.of(context).accentColor,
-                    radius: 32,
-                    text: widget.userDetails!.firstName,
+                    radius: 32.0,
+                    text: userDetails.firstName,
                   )
                 : RoundedAvatar(
                     backgroundColor: Colors.blueGrey.withOpacity(0.5),
-                    radius: 32,
+                    radius: 32.0,
                   ),
           ),
           Align(
@@ -137,37 +119,34 @@ class NavDrawerState extends State<NavDrawer>
             child: _buildThemeSwitcher(),
           ),
           Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
+            left: 0.0,
+            right: 0.0,
+            bottom: 0.0,
             child: Container(
-              height: 40,
+              height: 40.0,
               child: Row(
                 children: <Widget>[
                   Expanded(
                     child: Builder(
                       builder: (context) {
-                        if (widget.userDetails != null) {
+                        if (userDetails != null) {
                           return Column(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                '${widget.userDetails!.firstName} ${widget.userDetails!.lastName}',
+                                '${userDetails.firstName} ${userDetails.lastName}'
+                                    .trim(),
                                 style: TextStyle(
                                   color: theme.drawerHeaderTitleColor,
-                                  fontSize: 15,
+                                  fontSize: 15.0,
                                 ),
                               ),
                               Text(
-                                _phoneNumberFormat != null
-                                    ? PhoneNumberMask.format(
-                                        text: widget.userDetails!.phoneNumber,
-                                        mask: _phoneNumberFormat!)
-                                    : widget.userDetails!.phoneNumber,
+                                formattedPhoneNumber ?? userDetails.phoneNumber,
                                 style: TextStyle(
                                   color: theme.drawerHeaderSubtitleColor,
-                                  fontSize: 13,
+                                  fontSize: 13.0,
                                   fontWeight: FontWeight.normal,
                                 ),
                               ),
@@ -183,11 +162,11 @@ class NavDrawerState extends State<NavDrawer>
                                   Expanded(
                                     flex: 1,
                                     child: Container(
-                                      height: 12,
+                                      height: 12.0,
                                       decoration: BoxDecoration(
                                         color: Colors.blueGrey.withOpacity(0.5),
                                         borderRadius: const BorderRadius.all(
-                                            Radius.circular(12)),
+                                            Radius.circular(12.0)),
                                       ),
                                     ),
                                   ),
@@ -202,11 +181,11 @@ class NavDrawerState extends State<NavDrawer>
                                   Expanded(
                                     flex: 2,
                                     child: Container(
-                                      height: 12,
+                                      height: 12.0,
                                       decoration: BoxDecoration(
                                         color: Colors.blueGrey.withOpacity(0.5),
                                         borderRadius: const BorderRadius.all(
-                                            Radius.circular(12)),
+                                            Radius.circular(12.0)),
                                       ),
                                     ),
                                   ),
@@ -238,34 +217,35 @@ class NavDrawerState extends State<NavDrawer>
     required String label,
     Color? color,
   }) {
+    final theme = ThemeManager.of(context).currentTheme;
+
     return InkWell(
       onTap: onTap,
       child: SizedBox(
-        height: 48,
+        height: 48.0,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: AspectRatio(
                 aspectRatio: 1.0,
                 child: Icon(
                   icon,
                   size: iconSize,
-                  color: Theme.of(context).textTheme.headline2!.color,
+                  color: theme.data.textTheme.headline2!.color,
                 ),
               ),
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(left: 10),
+                padding: const EdgeInsets.only(left: 10.0),
                 child: Text(
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
-                    fontSize: 15,
-                    color:
-                        color ?? Theme.of(context).textTheme.headline1!.color,
+                    fontSize: 15.0,
+                    color: color ?? theme.data.textTheme.headline1!.color,
                   ),
                 ),
               ),

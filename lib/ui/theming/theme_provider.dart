@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:telegram_clone_mobile/ui/themes/material_themes.dart';
+import 'package:telegram_clone_mobile/ui/theming/material_themes.dart';
 
 class ThemeProvider extends ChangeNotifier {
   AppTheme _customTheme = DarkAppTheme();

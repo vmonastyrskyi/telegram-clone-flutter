@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/provider/select_country_provider.dart';
 import 'package:telegram_clone_mobile/util/multi_sliver.dart';
+import 'package:telegram_clone_mobile/view_models/auth/select_country/custom_app_bar_view_model.dart';
+import 'package:telegram_clone_mobile/view_models/auth/select_country/select_country_viewmodel.dart';
 
+import 'strings.dart';
 import 'widgets/country_group_list_item.dart';
 import 'widgets/custom_app_bar.dart';
 import 'widgets/searched_country_list_item.dart';
@@ -11,17 +13,23 @@ class SelectCountryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
-      body: Consumer<SelectCountryProvider>(
-        builder: (_, chooseCountry, __) {
-          final countriesGroups = chooseCountry.countriesGroups;
-          final searchedCountries = chooseCountry.searchedCountries;
-          final enableCountrySearch = chooseCountry.enableCountrySearch;
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ChangeNotifierProvider(
+          create: (_) => CustomAppBarViewModel(),
+          child: CustomAppBar(),
+        ),
+      ),
+      body: Consumer<SelectCountryViewModel>(
+        builder: (_, model, __) {
+          final countriesGroups = model.countriesGroups;
+          final searchedCountries = model.searchedCountries;
+          final enableCountrySearch = model.enableCountrySearch;
 
           if (enableCountrySearch)
             return CustomScrollView(
               slivers: <Widget>[
-                if (searchedCountries.length > 0)
+                if (searchedCountries.isNotEmpty)
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
@@ -37,10 +45,10 @@ class SelectCountryScreen extends StatelessWidget {
                   SliverFillRemaining(
                     child: Center(
                       child: Text(
-                        'No results',
+                        SelectCountryStrings.kNoResultsText,
                         style: TextStyle(
                           color: Theme.of(context).textTheme.headline2!.color,
-                          fontSize: 20,
+                          fontSize: 20.0,
                         ),
                       ),
                     ),
@@ -50,7 +58,7 @@ class SelectCountryScreen extends StatelessWidget {
           else
             return CustomScrollView(
               slivers: <Widget>[
-                for (var i = 0; i < countriesGroups.length; i++)
+                for (int i = 0; i < countriesGroups.length; i++)
                   MultiSliver(
                     children: <Widget>[
                       CountryGroupListItem(
@@ -59,11 +67,9 @@ class SelectCountryScreen extends StatelessWidget {
                       if (i != countriesGroups.length - 1)
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(72, 8, 24, 8),
-                            child: Divider(
-                              height: 1,
-                              color: Theme.of(context).dividerColor,
-                            ),
+                            padding:
+                                const EdgeInsets.fromLTRB(72.0, 8.0, 24.0, 8.0),
+                            child: Divider(height: 0.5),
                           ),
                         ),
                     ],

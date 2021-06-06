@@ -16,27 +16,19 @@ class MaskedInputController extends TextEditingController {
     this.filter = filter ?? _defaultFilter;
 
     addListener(() {
-      formatText(this.text);
+      _formatText(this.text);
     });
 
-    formatText(this.text);
+    _formatText(this.text);
   }
 
   String mask;
   Map<String, RegExp>? filter;
 
-  void formatText(String text) {
-    this.text = _applyMask(this.mask, text);
-  }
-
   void changeMask(String mask) {
     this.mask = mask;
-    formatText(text);
-    moveCursorToEnd();
-  }
-
-  void moveCursorToEnd() {
-    selection = TextSelection.fromPosition(TextPosition(offset: (text).length));
+    _formatText(text);
+    _moveCursorToEnd();
   }
 
   @override
@@ -50,6 +42,14 @@ class MaskedInputController extends TextEditingController {
 
   bool isValid() {
     return text.length == mask.length;
+  }
+
+  void _formatText(String text) {
+    this.text = _applyMask(this.mask, text);
+  }
+
+  void _moveCursorToEnd() {
+    selection = TextSelection.fromPosition(TextPosition(offset: (text).length));
   }
 
   String _applyMask(String mask, String value) {

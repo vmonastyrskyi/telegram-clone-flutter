@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:telegram_clone_mobile/provider/theme_provider.dart';
+import 'package:telegram_clone_mobile/ui/theming/theme_provider.dart';
 
 import 'theme_manager.dart';
 import 'theme_switcher_circle_clipper.dart';

@@ -1,11 +1,15 @@
 import 'package:get_it/get_it.dart';
+import 'package:telegram_clone_mobile/services/country_service.dart';
 
-import 'services/firebase/auth_service.dart';
-import 'services/firebase/user_service.dart';
+import 'services/auth_service.dart';
+import 'services/chat_service.dart';
+import 'services/user_service.dart';
 
-final services = GetIt.instance;
+final locator = GetIt.instance;
 
-void setupServices() {
-  services.registerLazySingleton<AuthService>(() => AuthService());
-  services.registerLazySingleton<UserService>(() => UserService());
+void setupLocator() {
+  locator.registerSingleton<AuthService>(AuthService());
+  locator.registerSingleton<UserService>(UserService());
+  locator.registerSingleton<ChatService>(ChatService());
+  locator.registerSingleton<CountryService>(CountryService());
 }
