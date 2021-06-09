@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/ui/screens/home/chats/widgets/saved_messages_list_item.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/appbar_icon_button.dart';
 import 'package:telegram_clone_mobile/ui/theming/theme_switcher_area.dart';
 import 'package:telegram_clone_mobile/view_models/home/chats/chats_viewmodel.dart';
 import 'package:telegram_clone_mobile/view_models/home/chats/dialog_list_item_viewmodel.dart';
+import 'package:telegram_clone_mobile/view_models/home/chats/dialog_viewmodel.dart';
 import 'package:telegram_clone_mobile/view_models/home/chats/nav_drawer_viewmodel.dart';
 import 'package:telegram_clone_mobile/view_models/home/chats/saved_messages_list_item_viewmodel.dart';
+import 'package:telegram_clone_mobile/view_models/home/chats/saved_messages_viewmodel.dart';
 
 import 'strings.dart';
 import 'widgets/chat_loading_list_item.dart';
 import 'widgets/dialog_list_item.dart';
 import 'widgets/nav_drawer.dart';
+import 'widgets/saved_messages_list_item.dart';
 
 class ChatsScreen extends StatefulWidget {
   @override
@@ -49,7 +51,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
             AppBarIconButton(
               onTap: () {},
               icon: Icons.search,
-              iconSize: 24,
+              iconSize: 24.0,
               iconColor: Theme.of(context).textTheme.headline1!.color!,
             ),
           ],
@@ -79,18 +81,36 @@ class _ChatsScreenState extends State<ChatsScreen> {
       builder: (context, model, child) {
         return ListView.builder(
           itemBuilder: (context, index) {
-            final chatListItemViewModel = model.chats[index];
-            if (chatListItemViewModel is SavedMessagesListItemViewModel) {
-              return ChangeNotifierProvider<
-                  SavedMessagesListItemViewModel>.value(
-                key: UniqueKey(),
-                value: chatListItemViewModel,
+            final chatViewModel = model.chats[index];
+
+            if (chatViewModel is SavedMessagesViewModel) {
+              return MultiProvider(
+                providers: [
+                  ChangeNotifierProvider<SavedMessagesViewModel>.value(
+                    value: chatViewModel,
+                  ),
+                  ChangeNotifierProxyProvider<SavedMessagesViewModel,
+                      SavedMessagesListItemViewModel>(
+                    create: (_) => SavedMessagesListItemViewModel(),
+                    update: (_, viewModel, listItemViewModel) =>
+                        listItemViewModel!..update(viewModel),
+                  ),
+                ],
                 child: SavedMessagesListItem(),
               );
-            } else if (chatListItemViewModel is DialogListItemViewModel) {
-              return ChangeNotifierProvider<DialogListItemViewModel>.value(
-                key: UniqueKey(),
-                value: chatListItemViewModel,
+            } else if (chatViewModel is DialogViewModel) {
+              return MultiProvider(
+                providers: [
+                  ChangeNotifierProvider<DialogViewModel>.value(
+                    value: chatViewModel,
+                  ),
+                  ChangeNotifierProxyProvider<DialogViewModel,
+                      DialogListItemViewModel>(
+                    create: (_) => DialogListItemViewModel(),
+                    update: (_, viewModel, listItemViewModel) =>
+                        listItemViewModel!..update(viewModel),
+                  ),
+                ],
                 child: DialogListItem(),
               );
             } else {
@@ -106,7 +126,9 @@ class _ChatsScreenState extends State<ChatsScreen> {
   Widget _buildChatListLoader() {
     return ListView(
       physics: NeverScrollableScrollPhysics(),
-      children: <Widget>[for (int i = 0; i < 12; i++) ChatLoadingListItem()],
+      children: <Widget>[
+        for (int i = 0; i < 12; i++) ChatLoadingListItem(),
+      ],
     );
   }
 }

@@ -65,7 +65,6 @@ class _InputPhoneScreenState extends State<InputPhoneScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         title: const Text(InputPhoneStrings.kTitle),
       ),
       body: Container(

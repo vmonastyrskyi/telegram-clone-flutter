@@ -68,11 +68,11 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(widget.phoneNumber),
         leading: AppBarIconButton(
           icon: Icons.arrow_back,
           onTap: () => Navigator.of(context).pop(),
         ),
+        title: Text(widget.phoneNumber),
       ),
       body: Container(
         padding: const EdgeInsets.symmetric(

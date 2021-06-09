@@ -4,9 +4,12 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:telegram_clone_mobile/constants/widgets.dart';
 import 'package:telegram_clone_mobile/models/message.dart';
+import 'package:telegram_clone_mobile/ui/screens/home/chat/dialog/dialog_screen.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/rounded_avatar.dart';
 import 'package:telegram_clone_mobile/ui/theming/theme_manager.dart';
+import 'package:telegram_clone_mobile/util/slide_left_with_fade_route.dart';
 import 'package:telegram_clone_mobile/view_models/home/chats/dialog_list_item_viewmodel.dart';
+import 'package:telegram_clone_mobile/view_models/home/chats/dialog_viewmodel.dart';
 
 class DialogListItem extends StatefulWidget {
   DialogListItem({Key? key}) : super(key: key);
@@ -17,24 +20,17 @@ class DialogListItem extends StatefulWidget {
 
 class _DialogListItemState extends State<DialogListItem> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      context.read<DialogListItemViewModel>().listenOnUserChanged();
-      context.read<DialogListItemViewModel>().listenOnChatChanged();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Navigator.push(
-        //   context,
-        //   SlideLeftWithFadeRoute(
-        //     builder: (context) => ChatScreen(data: data),
-        //   ),
-        // );
+        Navigator.of(context).push(
+          SlideWithFadeRoute(
+            builder: (_) => ChangeNotifierProvider.value(
+              value: context.read<DialogViewModel>(),
+              child: DialogScreen(),
+            ),
+          ),
+        );
       },
       child: SizedBox(
         height: WidgetsConstants.kChatListItemHeight,
@@ -78,7 +74,7 @@ class _DialogListItemState extends State<DialogListItem> {
 
     return Stack(
       children: <Widget>[
-        Selector<DialogListItemViewModel, String>(
+        Selector<DialogViewModel, String>(
           selector: (context, model) => model.title,
           builder: (context, title, child) {
             return AspectRatio(
@@ -90,7 +86,7 @@ class _DialogListItemState extends State<DialogListItem> {
             );
           },
         ),
-        Selector<DialogListItemViewModel, bool>(
+        Selector<DialogViewModel, bool>(
           selector: (context, model) => model.dialogUserOnline,
           builder: (context, dialogUserOnline, child) {
             return Positioned(
@@ -144,7 +140,7 @@ class _DialogListItemState extends State<DialogListItem> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
-            Selector<DialogListItemViewModel, String>(
+            Selector<DialogViewModel, String>(
               selector: (context, model) => model.title,
               builder: (context, chatTitle, child) {
                 return Expanded(
@@ -215,10 +211,10 @@ class _DialogListItemState extends State<DialogListItem> {
                 );
               },
             ),
-            Selector<DialogListItemViewModel, int>(
-              selector: (context, model) => model.nonReadCounter,
-              builder: (context, nonReadCounter, child) {
-                if (nonReadCounter > 0) {
+            Selector<DialogViewModel, int>(
+              selector: (context, model) => model.unreadMessageCounter,
+              builder: (context, unreadMessageCounter, child) {
+                if (unreadMessageCounter > 0) {
                   return Container(
                     width: 48.0,
                     margin: const EdgeInsets.only(left: 6.0),
@@ -238,7 +234,7 @@ class _DialogListItemState extends State<DialogListItem> {
                         ),
                         child: Center(
                           child: Text(
-                            '$nonReadCounter',
+                            '$unreadMessageCounter',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white,

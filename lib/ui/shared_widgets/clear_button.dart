@@ -12,7 +12,7 @@ class ClearButton extends AnimatedWidget {
         ).animate(
           CurvedAnimation(
             parent: controller,
-            curve: Curves.easeInOutSine,
+            curve: Curves.easeInOutCubic,
           ),
         ),
         _rotation = Tween<double>(
@@ -21,7 +21,7 @@ class ClearButton extends AnimatedWidget {
         ).animate(
           CurvedAnimation(
             parent: controller,
-            curve: Curves.easeInOutSine,
+            curve: Curves.easeInOutCubic,
           ),
         ),
         super(key: key, listenable: controller);

@@ -33,7 +33,7 @@ class HomeViewModel extends BaseViewModel {
   void listenOnUserChanged() {
     if (_authService.currentUser != null) {
       _userService
-          .onUserChanged(userId: _authService.currentUser!.uid)
+          .onUserChanged(id: _authService.currentUser!.uid)
           .listen((userDetailsSnap) async {
         if (userDetailsSnap.exists && userDetailsSnap.data() != null) {
           final userDetails = userDetailsSnap.data()!;

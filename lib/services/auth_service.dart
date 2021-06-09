@@ -45,7 +45,7 @@ class AuthService {
       final username = _generateUsername();
 
       await locator<UserService>().addUser(
-            userId: userCredentials.user!.uid,
+            id: userCredentials.user!.uid,
             details: UserDetails(
               username: username,
               firstName: username,

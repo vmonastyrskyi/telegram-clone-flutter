@@ -2,24 +2,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:telegram_clone_mobile/locator.dart';
 import 'package:telegram_clone_mobile/models/chat.dart';
 import 'package:telegram_clone_mobile/models/message.dart';
-import 'package:telegram_clone_mobile/services/auth_service.dart';
 import 'package:telegram_clone_mobile/services/chat_service.dart';
 import 'package:telegram_clone_mobile/services/user_service.dart';
 import 'package:telegram_clone_mobile/view_models/base_viewmodel.dart';
+import 'package:telegram_clone_mobile/view_models/home/chats/saved_messages_viewmodel.dart';
 
-import 'chat_list_item_viewmodel.dart';
-import 'dialog_list_item_viewmodel.dart';
-import 'saved_messages_list_item_viewmodel.dart';
+import 'chat_viewmodel.dart';
+import 'dialog_viewmodel.dart';
 
 class ChatsViewModel extends BaseViewModel {
-  final AuthService _authService = locator<AuthService>();
   final UserService _userService = locator<UserService>();
   final ChatService _chatService = locator<ChatService>();
 
-  List<ChatListItemViewModel> _chats = [];
+  List<ChatViewModel> _chats = [];
   bool _chatsLoaded = false;
 
-  List<ChatListItemViewModel> get chats => _chats;
+  List<ChatViewModel> get chats => _chats;
 
   bool get chatsLoaded => _chatsLoaded;
 
@@ -32,65 +30,24 @@ class ChatsViewModel extends BaseViewModel {
     final chatRefs = await _userService.getChats();
 
     await Future.forEach<DocumentReference>(chatRefs, (chatRef) async {
-      final chatSnap = await _chatService.getChatById(chatId: chatRef.id);
-      if (chatSnap.exists && chatSnap.data() != null) {
-        final chat = chatSnap.data()!;
+      final chatSnapshot = await _chatService.getChatById(id: chatRef.id);
 
-        if (chat.messageCounter > 0) {
-          switch (chat.type) {
-            case ChatType.SavedMessages:
-              final lastMessage = await _getLastMessage(chatSnap);
+      if (chatSnapshot.exists && chatSnapshot.data() != null) {
+        final chatData = chatSnapshot.data()!;
 
-              _chats.add(
-                SavedMessagesListItemViewModel(
-                  id: chatSnap.id,
-                  title: 'Saved Messages',
-                  lastMessage: lastMessage,
-                ),
-              );
-              break;
-            case ChatType.Dialog:
-              final lastMessage = await _getLastMessage(chatSnap);
-
-              final dialogUserDetailsSnap = await _userService.getUserById(
-                userId: chat.users
-                    .where((userRef) =>
-                        userRef.id != _authService.currentUser!.uid)
-                    .first
-                    .id,
-              );
-              if (!dialogUserDetailsSnap.exists) {
-                return;
-              }
-
-              final dialogUserDetails = dialogUserDetailsSnap.data()!;
-              final chatTitle =
-                  '${dialogUserDetails.firstName} ${dialogUserDetails.lastName}'
-                      .trim();
-              final dialogUserId = dialogUserDetailsSnap.id;
-
-              int nonReadCounter = 0;
-              final nonReadMessageSnaps = (await chatSnap.reference
-                      .collection(ChatFields.Messages)
-                      .where(MessageFields.Read, isEqualTo: false)
-                      .where(MessageFields.Owner, isEqualTo: dialogUserId)
-                      .get())
-                  .docs;
-              if (nonReadMessageSnaps.isNotEmpty) {
-                nonReadCounter = nonReadMessageSnaps.length;
-              }
-
-              _chats.add(
-                DialogListItemViewModel(
-                  id: chatSnap.id,
-                  title: chatTitle,
-                  lastMessage: lastMessage,
-                  dialogUserId: dialogUserId,
-                  nonReadCounter: nonReadCounter,
-                ),
-              );
-              break;
-          }
+        switch (chatData.type) {
+          case ChatType.SavedMessages:
+            final model = SavedMessagesViewModel(snapshot: chatSnapshot);
+            await model.initialize();
+            _chats.add(model);
+            break;
+          case ChatType.Dialog:
+            final model = DialogViewModel(snapshot: chatSnapshot);
+            await model.initialize();
+            _chats.add(model);
+            break;
+          case ChatType.Group:
+            break;
         }
       }
     });
@@ -100,34 +57,32 @@ class ChatsViewModel extends BaseViewModel {
     chatsLoaded = true;
   }
 
-  Future<Message> _getLastMessage(DocumentSnapshot<Chat> snapshot) async {
-    final lastMessageSnap = (await snapshot.reference
-            .collection(ChatFields.Messages)
-            .orderBy(MessageFields.CreatedAt, descending: true)
-            .limit(1)
-            .get())
-        .docs;
-    return Message.fromJson(lastMessageSnap.first.data());
-  }
-
   void listenChatsChanges() {
     _chats.forEach((chat) {
-      _chatService.onChatMessagesChanged(chatId: chat.id).listen((messagesSnaps) {
-        if (messagesSnaps.size > 0) {
-          final messages = messagesSnaps.docs
-              .map((messageSnap) => messageSnap.data())
-              .toList();
-          messages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-          chat.lastMessage = messages.first;
-          _sortChatsByLastMessageDate();
-        }
+      _chatService.onChatMessagesChanged(id: chat.snapshot.id).listen((_) {
+        _sortChatsByLastMessageDate();
       });
     });
   }
 
   void _sortChatsByLastMessageDate() {
-    _chats.sort(
-        (a, b) => b.lastMessage.createdAt.compareTo(a.lastMessage.createdAt));
+    _chats.sort((a, b) {
+      final lastMessageA = _getLastMessage(a);
+      final lastMessageB = _getLastMessage(b);
+      if (lastMessageA != null && lastMessageB != null) {
+        return lastMessageB.createdAt.compareTo(lastMessageA.createdAt);
+      } else {
+        return 0;
+      }
+    });
     notifyListeners();
+  }
+
+  Message? _getLastMessage(ChatViewModel chatViewModel) {
+    if (chatViewModel is SavedMessagesViewModel) {
+      return chatViewModel.messages.first.data();
+    } else if (chatViewModel is DialogViewModel) {
+      return chatViewModel.messages.first.data();
+    }
   }
 }

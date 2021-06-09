@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:telegram_clone_mobile/models/country.dart';
-import 'package:telegram_clone_mobile/ui/screens/auth/input_phone/input_phone_screen.dart';
-import 'package:telegram_clone_mobile/ui/screens/auth/phone_verification/phone_verification_screen.dart';
-import 'package:telegram_clone_mobile/ui/screens/auth/select_country/select_country_screen.dart';
 import 'package:telegram_clone_mobile/util/slide_left_with_fade_route.dart';
 import 'package:telegram_clone_mobile/view_models/auth/input_phone/input_phone_viewmodel.dart';
 import 'package:telegram_clone_mobile/view_models/auth/phone_verification/phone_verification_viewmodel.dart';
 import 'package:telegram_clone_mobile/view_models/auth/select_country/select_country_viewmodel.dart';
+
+import 'input_phone/input_phone_screen.dart';
+import 'phone_verification/phone_verification_screen.dart';
+import 'select_country/select_country_screen.dart';
 
 abstract class AuthRoutes {
   static const String InputPhone = 'input-phone';

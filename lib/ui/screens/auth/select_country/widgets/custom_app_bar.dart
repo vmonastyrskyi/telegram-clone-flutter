@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/appbar_icon_button.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/clear_button.dart';
-import 'package:telegram_clone_mobile/view_models/auth/select_country/custom_app_bar_view_model.dart';
+import 'package:telegram_clone_mobile/view_models/auth/select_country/custom_app_bar_viewmodel.dart';
 import 'package:telegram_clone_mobile/view_models/auth/select_country/select_country_viewmodel.dart';
 
 import '../strings.dart';
@@ -44,8 +44,16 @@ class _CustomAppBarState extends State<CustomAppBar>
     return Consumer<CustomAppBarViewModel>(
       builder: (_, model, __) {
         return AppBar(
-          titleSpacing: 0.0,
           automaticallyImplyLeading: false,
+          leading: AppBarIconButton(
+            icon: Icons.arrow_back,
+            onTap: () {
+              enableCountrySearch
+                  ? _toggleCountrySearch(false)
+                  : Navigator.of(context).pop();
+            },
+          ),
+          titleSpacing: 0.0,
           title: Padding(
             padding: const EdgeInsets.only(left: 16.0),
             child: AnimatedSwitcher(
@@ -67,16 +75,9 @@ class _CustomAppBarState extends State<CustomAppBar>
                   ),
                 );
               },
-              child: enableCountrySearch ? _buildCountrySearch() : _buildTitle(),
+              child:
+                  enableCountrySearch ? _buildCountrySearch() : _buildTitle(),
             ),
-          ),
-          leading: AppBarIconButton(
-            icon: Icons.arrow_back,
-            onTap: () {
-              enableCountrySearch
-                  ? _toggleCountrySearch(false)
-                  : Navigator.of(context).pop();
-            },
           ),
           actions: <Widget>[
             if (!enableCountrySearch)

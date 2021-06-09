@@ -16,26 +16,28 @@ class UserService {
       );
 
   Stream<DocumentSnapshot<UserDetails>> onUserChanged(
-      {required String userId}) {
-    return _usersRef.doc(userId).snapshots();
+      {required String id}) {
+    return _usersRef.doc(id).snapshots();
   }
 
   Future<DocumentSnapshot<UserDetails>> getUserById(
-      {required String userId}) async {
-    return await _usersRef.doc(userId).get();
+      {required String id}) async {
+    return await _usersRef.doc(id).get();
   }
 
-  Future<void> addUser(
-      {required String userId, required UserDetails details}) async {
-    return await _usersRef.doc(userId).set(details);
+  Future<void> addUser({
+    required String id,
+    required UserDetails details,
+  }) async {
+    return await _usersRef.doc(id).set(details);
   }
 
   Future<List<DocumentReference>> getChats() async {
     final userId = _auth.currentUser!.uid;
-    final userDetailsSnap = await _usersRef.doc(userId).get();
+    final userSnapshot = await _usersRef.doc(userId).get();
 
-    if (userDetailsSnap.exists && userDetailsSnap.data() != null) {
-      return userDetailsSnap.data()!.chats;
+    if (userSnapshot.exists && userSnapshot.data() != null) {
+      return userSnapshot.data()!.chats;
     }
 
     return [];

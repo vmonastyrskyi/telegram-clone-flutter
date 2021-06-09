@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:telegram_clone_mobile/util/multi_sliver.dart';
-import 'package:telegram_clone_mobile/view_models/auth/select_country/custom_app_bar_view_model.dart';
+import 'package:telegram_clone_mobile/view_models/auth/select_country/custom_app_bar_viewmodel.dart';
 import 'package:telegram_clone_mobile/view_models/auth/select_country/select_country_viewmodel.dart';
 
 import 'strings.dart';

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/ui/screens/home/chats/chats_screen.dart';
-import 'package:telegram_clone_mobile/ui/screens/home/contacts/contacts_screen.dart';
 import 'package:telegram_clone_mobile/util/slide_left_with_fade_route.dart';
 import 'package:telegram_clone_mobile/view_models/home/chats/chats_viewmodel.dart';
+
+import 'chats/chats_screen.dart';
+import 'contacts/contacts_screen.dart';
 
 abstract class HomeRoutes {
   static const String Chats = 'chats';

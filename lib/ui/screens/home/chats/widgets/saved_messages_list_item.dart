@@ -5,9 +5,12 @@ import 'package:provider/provider.dart';
 import 'package:telegram_clone_mobile/constants/widgets.dart';
 import 'package:telegram_clone_mobile/models/message.dart';
 import 'package:telegram_clone_mobile/ui/icons/app_icons.dart';
+import 'package:telegram_clone_mobile/ui/screens/home/chat/saved_messages/saved_messages_screen.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/rounded_avatar.dart';
 import 'package:telegram_clone_mobile/ui/theming/theme_manager.dart';
+import 'package:telegram_clone_mobile/util/slide_left_with_fade_route.dart';
 import 'package:telegram_clone_mobile/view_models/home/chats/saved_messages_list_item_viewmodel.dart';
+import 'package:telegram_clone_mobile/view_models/home/chats/saved_messages_viewmodel.dart';
 
 class SavedMessagesListItem extends StatefulWidget {
   SavedMessagesListItem({Key? key}) : super(key: key);
@@ -21,12 +24,14 @@ class _SavedMessagesListItemState extends State<SavedMessagesListItem> {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Navigator.push(
-        //   context,
-        //   SlideLeftWithFadeRoute(
-        //     builder: (context) => ChatScreen(data: data),
-        //   ),
-        // );
+        Navigator.of(context).push(
+          SlideWithFadeRoute(
+            builder: (_) => ChangeNotifierProvider.value(
+              value: context.read<SavedMessagesViewModel>(),
+              child: SavedMessagesScreen(),
+            ),
+          ),
+        );
       },
       child: SizedBox(
         height: WidgetsConstants.kChatListItemHeight,
@@ -70,7 +75,7 @@ class _SavedMessagesListItemState extends State<SavedMessagesListItem> {
 
     return Stack(
       children: <Widget>[
-        Selector<SavedMessagesListItemViewModel, String>(
+        Selector<SavedMessagesViewModel, String>(
           selector: (context, model) => model.title,
           builder: (context, title, child) {
             return AspectRatio(
@@ -93,7 +98,7 @@ class _SavedMessagesListItemState extends State<SavedMessagesListItem> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
-            Selector<SavedMessagesListItemViewModel, String>(
+            Selector<SavedMessagesViewModel, String>(
               selector: (context, model) => model.title,
               builder: (context, chatTitle, child) {
                 return Expanded(
