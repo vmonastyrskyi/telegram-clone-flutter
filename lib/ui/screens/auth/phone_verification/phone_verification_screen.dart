@@ -1,26 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
-import 'package:telegram_clone_mobile/services/firebase/firebase_auth_service.dart';
-import 'package:telegram_clone_mobile/ui/screens/auth/phone_verification/widgets/otp_form.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/appbar_icon_button.dart';
 import 'package:telegram_clone_mobile/ui/shared_widgets/modal.dart';
 import 'package:telegram_clone_mobile/util/curves/sine_curve.dart';
+import 'package:telegram_clone_mobile/view_models/auth/phone_verification/phone_verification_viewmodel.dart';
 import 'package:vibration/vibration.dart';
 
-class PhoneVerificationArgs {
-  final String phone;
+import 'strings.dart';
+import 'widgets/otp_form.dart';
 
-  PhoneVerificationArgs(this.phone);
+class PhoneVerificationArgs {
+  PhoneVerificationArgs({
+    required this.phoneNumber,
+  });
+
+  final String phoneNumber;
 }
 
 class PhoneVerificationScreen extends StatefulWidget {
-  final String phone;
-
   const PhoneVerificationScreen({
     Key? key,
-    required this.phone,
+    required this.phoneNumber,
   }) : super(key: key);
+
+  final String phoneNumber;
 
   @override
   _PhoneVerificationScreenState createState() =>
@@ -32,15 +36,11 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
   static const String _kOtpFormInputPrefix = 'otpFormInput';
   static const int _kVibrationDuration = 175;
   static const int _kShakeDuration = 350;
-  static const int _kOtpCodeLength = 6;
 
   final GlobalKey<OtpFormState> _otpFormKey = GlobalKey();
 
   late final AnimationController _otpInputAnimationController;
   late final Animation<Offset> _otpInputPosition;
-
-  int? resendToken;
-  String? verificationId;
 
   @override
   void initState() {
@@ -52,8 +52,9 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
     _otpInputPosition = Tween(begin: Offset(0.0125, 0.0), end: Offset.zero)
         .chain(CurveTween(curve: SineCurve(waves: 3)))
         .animate(_otpInputAnimationController);
-
-    _signInWithPhoneNumber();
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _signInWithPhoneNumber();
+    });
   }
 
   @override
@@ -67,12 +68,11 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(widget.phone),
-        elevation: 1.5,
         leading: AppBarIconButton(
           icon: Icons.arrow_back,
           onTap: () => Navigator.of(context).pop(),
         ),
+        title: Text(widget.phoneNumber),
       ),
       body: Container(
         padding: const EdgeInsets.symmetric(
@@ -84,82 +84,72 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
             const SizedBox(
               width: 64.0,
               height: 64.0,
-              child: const Image(
+              child: Image(
                 image: AssetImage('assets/images/phone_sms.png'),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: Text(
-                'Check your Phone messages',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).textTheme.headline1!.color,
-                ),
+            const SizedBox(height: 20.0),
+            Text(
+              PhoneVerificationStrings.kHintText1,
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).textTheme.headline1!.color,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0),
+            const SizedBox(height: 20.0),
+            Text(
+              PhoneVerificationStrings.kHintText2,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.headline2!.color,
+              ),
+            ),
+            const SizedBox(height: 32.0),
+            Consumer<PhoneVerificationViewModel>(
+              builder: (context, model, _) {
+                return SlideTransition(
+                  position: _otpInputPosition,
+                  child: OtpForm(
+                    key: _otpFormKey,
+                    inputPrefix: _kOtpFormInputPrefix,
+                    length: model.otpCodeLength,
+                    onSubmit: (code) async {
+                      if (await model.signInWithCode(code)) {
+                        Navigator.of(context).pop(true);
+                      } else {
+                        await _showAlert(
+                          message:
+                              PhoneVerificationStrings.kInvalidCodeAlertMessage,
+                        );
+                        _otpFormKey.currentState!.reset();
+                      }
+                    },
+                    onEditingComplete: (code) async {
+                      if (code.isEmpty) {
+                        Vibration.vibrate(duration: _kVibrationDuration);
+                        _otpInputAnimationController.forward(from: 0.0);
+                      } else if (code.length < model.otpCodeLength) {
+                        await _showAlert(
+                          message:
+                              PhoneVerificationStrings.kInvalidCodeAlertMessage,
+                        );
+                        _otpFormKey.currentState!.reset();
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 40.0),
+            GestureDetector(
+              onTap: () => _signInWithPhoneNumber(),
               child: Text(
-                'We\'ve sent an SMS with code to your device.',
+                PhoneVerificationStrings.kReSendSMSButtonText,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Theme.of(context).textTheme.headline2!.color,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 32.0),
-              child: SlideTransition(
-                position: _otpInputPosition,
-                child: OtpForm(
-                  key: _otpFormKey,
-                  inputPrefix: _kOtpFormInputPrefix,
-                  length: _kOtpCodeLength,
-                  onSubmit: (code) async {
-                    if (verificationId != null) {
-                      print('Sign in with code $code');
-                      // TODO: uncomment
-                      // final credential = PhoneAuthProvider.credential(
-                      //     verificationId: verificationId!, smsCode: code);
-                      // context.read<FirebaseAuthService>().signInWithCredentials(
-                      //     credential);
-                    } else {
-                      print('Invalid verificationId.');
-                      await _showAlert(
-                        title: 'Telegram',
-                        message: 'Invalid code, please try again.',
-                      );
-                      _otpFormKey.currentState!.reset();
-                    }
-                  },
-                  onEditingComplete: (code) async {
-                    if (code.isEmpty) {
-                      Vibration.vibrate(duration: _kVibrationDuration);
-                      _otpInputAnimationController.forward(from: 0.0);
-                    } else if (code.length < _kOtpCodeLength) {
-                      await _showAlert(
-                        title: 'Telegram',
-                        message: 'Invalid code, please try again.',
-                      );
-                      _otpFormKey.currentState!.reset();
-                    }
-                  },
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 40.0),
-              child: GestureDetector(
-                onTap: _signInWithPhoneNumber,
-                child: Text(
-                  'Re-send an SMS with code',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15.0,
-                    color: Theme.of(context).accentColor,
-                  ),
+                  fontSize: 15.0,
+                  color: Theme.of(context).accentColor,
                 ),
               ),
             ),
@@ -170,54 +160,44 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
   }
 
   void _signInWithPhoneNumber() {
-    context.read<FirebaseAuthService>().signInWithPhoneNumber(
-      widget.phone,
+    final model = context.read<PhoneVerificationViewModel>();
+
+    model.signInWithPhoneNumber(
+      phoneNumber: widget.phoneNumber,
       verificationCompleted: (credential) async {
-        if (mounted) {
-          if (credential.smsCode != null) {
-            print('Auto verification completed.');
+        if (credential.smsCode != null) {
+          if (mounted) {
             _otpFormKey.currentState!.fillAndDisable(credential.smsCode!);
-            // TODO: uncomment
-            // await context.read<FirebaseAuthService>().signInWithCredentials(credential);
+            if (await model.signInWithCredential(credential)) {
+              Navigator.of(context).pop(true);
+            } else {
+              _otpFormKey.currentState!.enabled = true;
+            }
           }
         }
       },
       verificationFailed: (error) {
         if (error.code == 'invalid-phone-number') {
           if (mounted) {
-            print('The provided phone number is not valid.');
             Navigator.of(context).pop();
             _showAlert(
-              title: 'Telegram',
-              message: 'The provided phone number is not valid.',
+              message: PhoneVerificationStrings.kInvalidPhoneNumberAlertMessage,
             );
           }
         }
       },
-      codeSent: (verificationId, resendToken) {
+      codeAutoRetrievalTimeout: (verificationId) {
         if (mounted) {
-          print('Code has been sent to the device.');
-          this.resendToken = resendToken;
-          this.verificationId = verificationId;
-        }
-      },
-      codeAutoRetrievalTimeout: (verificationId) async {
-        if (mounted) {
-          print('Code expired, please retry login.');
           Navigator.of(context).pop();
           _showAlert(
-            title: 'Telegram',
-            message: 'Code expired, please retry login.',
+            message: PhoneVerificationStrings.kCodeExpiredAlertMessage,
           );
         }
       },
-      forceResendingToken: resendToken,
     );
-    this.resendToken = null;
   }
 
   Future<void> _showAlert({
-    required String title,
     required String message,
   }) async {
     return showGeneralDialog<void>(
@@ -241,7 +221,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
       transitionDuration: Duration(milliseconds: 250),
       pageBuilder: (context, _, __) {
         return Modal(
-          title: title,
+          title: PhoneVerificationStrings.kAlertTitle,
           content: Text(
             message,
             style: TextStyle(
