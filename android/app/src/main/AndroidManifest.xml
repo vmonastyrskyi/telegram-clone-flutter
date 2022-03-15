@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.vmdev.telegram_clone_mobile">
+    package="com.vm.telegram_clone">
 
     <uses-permission android:name="android.permission.VIBRATE" />
 

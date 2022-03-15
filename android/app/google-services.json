@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:835625901007:android:24b4e0042c44fe89ea10ba",
         "android_client_info": {
-          "package_name": "com.vmdev.telegram_clone_mobile"
+          "package_name": "com.vm.telegram_clone"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "835625901007-3f4m2q9iiniemt85lj70e5i0m65pfgio.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.vmdev.telegram_clone_mobile",
+            "package_name": "com.vm.telegram_clone",
             "certificate_hash": "d95b3f15b8ea12f28b95dfb82eeaa8e61d086349"
           }
         },

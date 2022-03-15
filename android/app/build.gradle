@@ -50,7 +50,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.vmdev.telegram_clone_mobile"
+        applicationId "com.vm.telegram_clone"
         minSdkVersion flutterMinSdkVersion
         targetSdkVersion flutterTargetSdkVersion
         versionCode flutterVersionCode.toInteger()

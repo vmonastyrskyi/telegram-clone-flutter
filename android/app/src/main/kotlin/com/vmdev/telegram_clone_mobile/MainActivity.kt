@@ -1,4 +1,4 @@
-package com.vmdev.telegram_clone_mobile
+package com.vm.telegram_clone
 
 import io.flutter.embedding.android.FlutterActivity
 

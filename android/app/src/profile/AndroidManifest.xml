@@ -1,7 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.vmdev.telegram_clone_mobile">
-    <!-- Flutter needs it to communicate with the running application
-         to allow setting breakpoints, to provide hot reload, etc.
-    -->
-    <uses-permission android:name="android.permission.INTERNET"/>
+    package="com.vm.telegram_clone">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    
 </manifest>
