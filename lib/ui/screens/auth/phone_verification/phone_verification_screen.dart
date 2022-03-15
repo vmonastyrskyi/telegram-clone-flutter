@@ -115,6 +115,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
                     inputPrefix: _kOtpFormInputPrefix,
                     length: model.otpCodeLength,
                     onSubmit: (code) async {
+                      print(code);
                       if (await model.signInWithCode(code)) {
                         Navigator.of(context).pop(true);
                       } else {
@@ -162,9 +163,13 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen>
   void _signInWithPhoneNumber() {
     final model = context.read<PhoneVerificationViewModel>();
 
+    print(widget.phoneNumber.replaceAll(' ', ''));
+
     model.signInWithPhoneNumber(
-      phoneNumber: widget.phoneNumber,
+      phoneNumber: widget.phoneNumber.replaceAll(' ', ''),
       verificationCompleted: (credential) async {
+        print('CREDENTIALS $credential');
+
         if (credential.smsCode != null) {
           if (mounted) {
             _otpFormKey.currentState!.fillAndDisable(credential.smsCode!);

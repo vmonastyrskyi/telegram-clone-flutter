@@ -45,16 +45,15 @@ class AuthService {
       final username = _generateUsername();
 
       await locator<UserService>().addUser(
-            id: userCredentials.user!.uid,
-            details: UserDetails(
-              username: username,
-              firstName: username,
-              lastName: '',
-              phoneNumber: _auth.currentUser!.phoneNumber!,
-              online: true,
-              chats: []
-            ),
-          );
+        id: userCredentials.user!.uid,
+        details: UserDetails(
+            username: username,
+            firstName: username,
+            lastName: '',
+            phoneNumber: _auth.currentUser!.phoneNumber!,
+            online: true,
+            chats: []),
+      );
     }
   }
 

@@ -53,14 +53,14 @@ class PinInputFormatter with TextInputFormatter {
 
     if (length == 1 && offset == 1) {
       result.write(text);
-      if (entry.next != null) {
-        entry.next!.input.tfFocusNode.requestFocus();
-      }
+      // if (entry.next != null) {
+      //   entry.next!.input.tfFocusNode.requestFocus();
+      // }
     } else if (length > 1 && offset > 1) {
       if (entry.next != null) {
         result.write(text[0]);
-        entry.next!.input.controller.text = text[1];
-        entry.next!.input.tfFocusNode.requestFocus();
+        // entry.next!.input.controller.text = text[1];
+        // entry.next!.input.tfFocusNode.requestFocus();
       } else {
         result.write(oldValue.text);
       }

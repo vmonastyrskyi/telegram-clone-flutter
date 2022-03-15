@@ -61,6 +61,13 @@ class CountryService {
           mask: '### ### ####',
           format: '+# ### ### ####'),
     ]),
+    CountryGroup('G', countries: [
+      Country(
+          name: 'Germany',
+          code: 49,
+          mask: '### ### ####',
+          format: '+# ### ### ####'),
+    ]),
   ];
 
   List<CountryGroup> getAllCountriesGroups() {
