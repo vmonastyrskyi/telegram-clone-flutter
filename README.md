@@ -1,4 +1,4 @@
-# Telegram Clone Mobile
+# Telegram Clone
 
 Telegram Clone Mobile application using Flutter and Firebase.
 
